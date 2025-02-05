@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 810 540">
+  <!-- Fundo azul -->
+  <rect width="810" height="540" fill="#003399"/>
+  
+  <!-- Círculo de estrelas -->
+  <g transform="translate(405,270)">
+    <!-- 12 estrelas -->
+    <g id="stars">
+      <g id="star">
+        <!-- Estrela individual com melhor definição -->
+        <path d="M0,-40 11.7557,-12.3607 38.0423,-12.3607 15.1432,4.7214 24.2705,32.3607 0,16.1803 -24.2705,32.3607 -15.1432,4.7214 -38.0423,-12.3607 -11.7557,-12.3607z" 
+              fill="#FFCC00" 
+              stroke="#FFB612" 
+              stroke-width="0.5"/>
+      </g>
+      <!-- Repetir a estrela 12 vezes em círculo -->
+      <use href="#star" transform="rotate(30)"/>
+      <use href="#star" transform="rotate(60)"/>
+      <use href="#star" transform="rotate(90)"/>
+      <use href="#star" transform="rotate(120)"/>
+      <use href="#star" transform="rotate(150)"/>
+      <use href="#star" transform="rotate(180)"/>
+      <use href="#star" transform="rotate(210)"/>
+      <use href="#star" transform="rotate(240)"/>
+      <use href="#star" transform="rotate(270)"/>
+      <use href="#star" transform="rotate(300)"/>
+      <use href="#star" transform="rotate(330)"/>
+    </g>
+    
+    <!-- Círculo guia (invisível) para posicionar as estrelas -->
+    <circle r="100" fill="none"/>
+    
+    <!-- Aplicar transformação para posicionar as estrelas -->
+    <g transform="scale(1.95)">
+      <use href="#stars"/>
+    </g>
+  </g>
+</svg>
