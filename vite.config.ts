@@ -4,6 +4,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [vue()],
+  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -14,9 +15,7 @@ export default defineConfig({
     assetsDir: '_assets',
     rollupOptions: {
       output: {
-        assetFileNames: '_assets/[name]-[hash][extname]',
-        chunkFileNames: '_assets/[name]-[hash].js',
-        entryFileNames: '_assets/[name]-[hash].js'
+        manualChunks: undefined
       }
     }
   }
