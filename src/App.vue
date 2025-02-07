@@ -89,7 +89,7 @@
               <img 
                 src="@/assets/Logo_Cambio_Hoje.svg" 
                 alt="Logo Câmbio Hoje" 
-                class="h-12 w-auto"
+                class="h-8 md:h-12 w-auto"
               />
             </router-link>
           </div>
@@ -161,7 +161,81 @@
                   Sair
                 </button>
               </div>
+              <button 
+                @click="mobileMenuOpen = !mobileMenuOpen"
+                class="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-primary-600 hover:bg-gray-50 transition-colors"
+              >
+                <Bars3Icon v-if="!mobileMenuOpen" class="h-6 w-6" />
+                <XMarkIcon v-else class="h-6 w-6" />
+              </button>
             </template>
+          </div>
+        </div>
+        <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200">
+          <div class="px-2 py-3 space-y-1">
+            <RouterLink
+              :to="{ name: 'agente-dashboard' }"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              :class="{ 'bg-gray-50 text-primary-600': $route.name === 'agente-dashboard' }"
+              @click="mobileMenuOpen = false"
+            >
+              <div class="flex items-center">
+                <HomeIcon class="h-5 w-5 mr-3" />
+                Dashboard
+              </div>
+            </RouterLink>
+            <RouterLink
+              to="/agente/alertas"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              :class="{ 'bg-gray-50 text-primary-600': $route.path.includes('/agente/alertas') && !$route.path.includes('/novo') }"
+              @click="mobileMenuOpen = false"
+            >
+              <div class="flex items-center">
+                <BellAlertIcon class="h-5 w-5 mr-3" />
+                Lista de Alertas
+              </div>
+            </RouterLink>
+            <RouterLink
+              to="/agente/webhook"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              :class="{ 'bg-gray-50 text-primary-600': $route.path.includes('/agente/webhook') }"
+              @click="mobileMenuOpen = false"
+            >
+              <div class="flex items-center">
+                <BoltIcon class="h-5 w-5 mr-3" />
+                Webhook
+              </div>
+            </RouterLink>
+            <RouterLink
+              to="/agente/configuracoes"
+              class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              :class="{ 'bg-gray-50 text-primary-600': $route.path.includes('/agente/configuracoes') }"
+              @click="mobileMenuOpen = false"
+            >
+              <div class="flex items-center">
+                <Cog6ToothIcon class="h-5 w-5 mr-3" />
+                Configurações
+              </div>
+            </RouterLink>
+            <RouterLink
+              to="/agente/alertas/novo"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white bg-primary-600 hover:bg-primary-700"
+              @click="mobileMenuOpen = false"
+            >
+              <div class="flex items-center">
+                <PlusIcon class="h-5 w-5 mr-3" />
+                Novo Alerta
+              </div>
+            </RouterLink>
+            <button
+              @click="() => { handleLogout(); mobileMenuOpen = false; }"
+              class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <div class="flex items-center">
+                <ArrowRightOnRectangleIcon class="h-5 w-5 mr-3" />
+                Sair
+              </div>
+            </button>
           </div>
         </div>
       </nav>
@@ -184,7 +258,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAlertasStore } from '@/stores/alertas'
 import { useCotacoesTempoReal } from '@/utils/cotacoes'
 import { dispatchWebhookEvent } from '@/services/webhookService'
-import { UserIcon, XMarkIcon, LockClosedIcon, ArrowPathIcon, HomeIcon, BellAlertIcon, PlusIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon, BoltIcon } from '@heroicons/vue/24/outline'
+import { UserIcon, XMarkIcon, LockClosedIcon, ArrowPathIcon, HomeIcon, BellAlertIcon, PlusIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon, BoltIcon, Bars3Icon } from '@heroicons/vue/24/outline'
 import { RouterLink, RouterView } from 'vue-router'
 import NotificationManager from '@/components/NotificationManager.vue'
 
@@ -193,6 +267,7 @@ const authStore = useAuthStore()
 const alertasStore = useAlertasStore()
 const cotacoesService = useCotacoesTempoReal()
 const showLoginModal = ref(false)
+const mobileMenuOpen = ref(false)
 const loginData = ref({
   email: '',
   password: ''

@@ -8,10 +8,10 @@
           Acompanhe as principais cotações em tempo real e crie alertas personalizados.
         </p>
       </div>
-      <div class="mt-4 sm:mt-0">
+      <div class="mt-4 sm:mt-0 w-full sm:w-auto">
         <RouterLink 
           :to="{ name: 'novo-alerta' }" 
-          class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#D6FC49] to-[#E5FD8B] px-4 py-2 text-sm font-semibold text-[#654CF0] shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 hover:from-[#E5FD8B] hover:to-[#D6FC49] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6FC49] active:scale-95 backdrop-blur-sm"
+          class="w-full sm:w-auto flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-[#D6FC49] to-[#E5FD8B] px-4 py-2.5 text-sm font-semibold text-[#654CF0] shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 hover:from-[#E5FD8B] hover:to-[#D6FC49] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6FC49] active:scale-95 backdrop-blur-sm"
         >
           <BellAlertIcon class="h-5 w-5 text-[#654CF0]" />
           Criar Alerta
@@ -81,17 +81,17 @@
                   <div class="flex flex-col">
                     <!-- Cabeçalho com Moeda e Variação -->
                     <div class="flex items-center justify-between mb-4">
-                      <div class="flex items-center gap-3">
+                      <div class="flex items-center gap-2 sm:gap-3">
                         <CurrencyFlag 
                           :code="moeda.code"
                           :currencyName="moeda.name"
-                          class="w-10 h-10"
+                          class="w-8 h-8 sm:w-10 sm:h-10"
                         />
                         <div>
-                          <h3 :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-2xl font-bold']">
+                          <h3 :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-xl sm:text-2xl font-bold']">
                             {{ moeda.name }}
                           </h3>
-                          <p :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-sm font-medium']">
+                          <p :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-xs sm:text-sm font-medium']">
                             {{ moeda.code }}/BRL
                           </p>
                         </div>
@@ -100,10 +100,10 @@
                         moeda.variacao > 0 
                           ? (turismoDark ? 'bg-green-900 text-green-300 ring-green-400/20' : 'bg-green-50 text-green-700 ring-green-600/20')
                           : (turismoDark ? 'bg-red-900 text-red-300 ring-red-400/20' : 'bg-red-50 text-red-700 ring-red-600/20'),
-                        'inline-flex items-center rounded-md px-4 py-2 text-base font-semibold ring-1 ring-inset'
+                        'inline-flex items-center rounded-md px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base font-semibold ring-1 ring-inset'
                       ]">
                         <component :is="moeda.variacao > 0 ? ArrowUpIcon : ArrowDownIcon" 
-                                 class="h-5 w-5 mr-1.5" />
+                                 class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-1.5" />
                         {{ moeda.variacao.toFixed(2) }}%
                       </span>
                     </div>
@@ -112,19 +112,19 @@
                     <div class="flex justify-between mt-4">
                       <!-- Cotação de Compra -->
                       <div class="flex flex-col items-start">
-                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-base font-medium uppercase tracking-wider mb-1']">
+                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-sm sm:text-base font-medium uppercase tracking-wider mb-1']">
                           Compra
                         </span>
-                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-4xl font-bold']">
+                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-3xl sm:text-4xl font-bold']">
                           {{ formatarCotacao(moeda.compra) }}
                         </span>
                       </div>
                       <!-- Cotação de Venda -->
                       <div class="flex flex-col items-end">
-                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-base font-medium uppercase tracking-wider mb-1']">
+                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-sm sm:text-base font-medium uppercase tracking-wider mb-1']">
                           Venda
                         </span>
-                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-4xl font-bold']">
+                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-3xl sm:text-4xl font-bold']">
                           {{ formatarCotacao(moeda.venda) }}
                         </span>
                       </div>
@@ -179,17 +179,17 @@
                 >
                   <!-- Cabeçalho do Card -->
                   <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 sm:gap-3">
                       <CurrencyFlag 
                         :code="moeda.code"
                         :currencyName="moeda.name"
-                        class="w-8 h-8"
+                        class="w-6 h-6 sm:w-8 sm:h-8"
                       />
-                      <h3 class="text-2xl font-bold" :class="comercialDark ? 'text-white' : 'text-gray-900'">
+                      <h3 class="text-xl sm:text-2xl font-bold" :class="comercialDark ? 'text-white' : 'text-gray-900'">
                         {{ moeda.code }}/BRL
                       </h3>
                     </div>
-                    <span class="text-4xl font-bold tracking-tight" :class="comercialDark ? 'text-white' : 'text-gray-900'">
+                    <span class="text-3xl sm:text-4xl font-bold tracking-tight" :class="comercialDark ? 'text-white' : 'text-gray-900'">
                       {{ formatarCotacao(parseFloat(moeda.ask), 'comercial') }}
                     </span>
                   </div>
@@ -214,10 +214,10 @@
                       parseFloat(moeda.pctChange) > 0 
                         ? (comercialDark ? 'bg-green-900 text-green-300 ring-green-400/20' : 'bg-green-50 text-green-700 ring-green-600/20')
                         : (comercialDark ? 'bg-red-900 text-red-300 ring-red-400/20' : 'bg-red-50 text-red-700 ring-red-600/20'),
-                      'inline-flex items-center rounded-md px-4 py-2 text-base font-semibold ring-1 ring-inset'
+                      'inline-flex items-center rounded-md px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base font-semibold ring-1 ring-inset'
                     ]">
                       <component :is="parseFloat(moeda.pctChange) > 0 ? ArrowUpIcon : ArrowDownIcon" 
-                               class="h-5 w-5 mr-1.5" />
+                               class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-1.5" />
                       {{ parseFloat(moeda.pctChange).toFixed(2) }}%
                     </span>
                   </div>
