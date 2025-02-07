@@ -31,23 +31,27 @@ export const useCambioStore = defineStore('cambio', () => {
 
     MOEDAS_TURISMO.forEach(code => {
       const cotacaoBase = cotacoesBase.value[code]
+      const cotacaoBaseCompra = cotacoesBase.value[`${code}_BID`]
       const taxa = taxas.value[code]
+      const taxaCompra = taxas.value[`${code}_COMPRA`]
       
       // Se não tiver os dados necessários, mantém o valor anterior
-      if (!cotacaoBase || taxa === undefined) {
+      if (!cotacaoBase || taxa === undefined || !cotacaoBaseCompra || taxaCompra === undefined) {
         if (cotacoesTurismo.value?.[code]) {
           cotacoesTurismoAtualizadas[code] = cotacoesTurismo.value[code]
           return
         }
       }
 
-      const cotacaoFinal = calcularCotacaoFinal(code as 'USD' | 'EUR' | 'GBP')
+      const cotacaoFinalVenda = calcularCotacaoFinal(code as 'USD' | 'EUR' | 'GBP', 'venda')
+      const cotacaoFinalCompra = calcularCotacaoFinal(code as 'USD' | 'EUR' | 'GBP', 'compra')
       const dadosComercial = cotacoesComercial.value[code]
       
       // Só atualiza se houver mudança real nos valores
       const cotacaoAtual = cotacoesTurismo.value?.[code]
       if (cotacaoAtual && 
-          cotacaoAtual.venda === cotacaoFinal && 
+          cotacaoAtual.venda === cotacaoFinalVenda &&
+          cotacaoAtual.compra === cotacaoFinalCompra &&
           cotacaoAtual.variacao === (dadosComercial ? parseFloat(dadosComercial.pctChange) : 0)) {
         cotacoesTurismoAtualizadas[code] = cotacaoAtual
         return
@@ -56,7 +60,8 @@ export const useCambioStore = defineStore('cambio', () => {
       cotacoesTurismoAtualizadas[code] = {
         code,
         name: getNomeMoeda(code),
-        venda: cotacaoFinal,
+        venda: cotacaoFinalVenda,
+        compra: cotacaoFinalCompra,
         variacao: dadosComercial ? parseFloat(dadosComercial.pctChange) : 0
       }
     })

@@ -21,10 +21,12 @@ import {
 } from '@heroicons/vue/24/outline'
 import { Money3Component } from 'v-money3'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const alertasStore = useAlertasStore()
 const authStore = useAuthStore()
+const { webhookAtivo, mensagemWebhook } = storeToRefs(alertasStore)
 const showEditModal = ref(false)
 const editingAlerta = ref<any>(null)
 const cotacaoAtual = ref(null)
@@ -492,10 +494,47 @@ watch(
 )
 
 // Watch para atualizar cotações quando alertas mudarem
-watch(() => alertasStore.alertas, async (novosAlertas) => {
+watch(() => alertasStore.alertas, async (alertas) => {
   console.log('Alertas mudaram, atualizando cotações...')
-  for (const alerta of novosAlertas) {
+  for (const alerta of alertas) {
     await buscarCotacaoAtual(alerta)
+  }
+}, { deep: true })
+
+// Watch para verificar se algum alerta teve webhook disparado recentemente
+watch(() => alertasStore.alertas, (alertas) => {
+  if (!alertas) return
+  
+  // Verifica se algum alerta teve webhook disparado recentemente
+  const alertasComWebhook = alertas.filter(alerta => {
+    const tempoLimite = 5000 // 5 segundos
+    
+    // Verifica webhook de cotação atingida
+    const webhookDisparado = alerta.webhookDisparado && 
+      alerta.horarioDisparo && 
+      (new Date().getTime() - new Date(alerta.horarioDisparo).getTime()) <= tempoLimite
+
+    // Verifica webhook de data expirada
+    const dataExpirada = alerta.dataExpirada && 
+      alerta.horarioExpiracao && 
+      (new Date().getTime() - new Date(alerta.horarioExpiracao).getTime()) <= tempoLimite
+
+    return webhookDisparado || dataExpirada
+  })
+
+  // Se encontrou algum alerta com webhook recente, mostra a notificação
+  if (alertasComWebhook.length > 0) {
+    const ultimoAlerta = alertasComWebhook[0]
+    
+    if (ultimoAlerta.dataExpirada) {
+      alertasStore.notificarWebhook(
+        `Alerta expirado! ${ultimoAlerta.moeda} - Data limite: ${formatarData(ultimoAlerta.dataLimite)}`
+      )
+    } else {
+      alertasStore.notificarWebhook(
+        `Alerta atingiu a cotação alvo! ${ultimoAlerta.moeda}: ${ultimoAlerta.cotacaoDisparo?.toFixed(4)}`
+      )
+    }
   }
 }, { deep: true })
 </script>
@@ -698,6 +737,15 @@ watch(() => alertasStore.alertas, async (novosAlertas) => {
          class="text-center py-8 text-gray-500">
       Nenhum alerta cadastrado ainda.
     </div>
+
+    <!-- Notificação do Webhook -->
+    <Transition name="fade">
+      <div v-if="webhookAtivo" class="webhook-notificacao">
+        <span class="webhook-texto">
+          {{ mensagemWebhook || 'Novo webhook recebido!' }}
+        </span>
+      </div>
+    </Transition>
 
     <!-- Modal de Edição -->
     <TransitionRoot appear :show="showEditModal" as="template">
@@ -947,3 +995,32 @@ watch(() => alertasStore.alertas, async (novosAlertas) => {
     </TransitionRoot>
   </div>
 </template>
+
+<style scoped>
+.webhook-notificacao {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #2196F3;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.webhook-texto {
+  font-weight: 500;
+}
+
+/* Animações */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

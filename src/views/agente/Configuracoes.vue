@@ -54,15 +54,18 @@
 
         <div class="space-y-6">
           <!-- Cabeçalho da tabela -->
-          <div class="grid grid-cols-4 gap-4 pb-2 border-b border-gray-200">
-            <div class="text-sm font-medium text-gray-500">Moeda</div>
-            <div class="text-sm font-medium text-gray-500">Percentual</div>
-            <div class="text-sm font-medium text-gray-500">Cotação Base</div>
-            <div class="text-sm font-medium text-gray-500">Cotação Final</div>
+          <div class="grid grid-cols-6 gap-4 mb-4 text-sm font-semibold text-gray-600">
+            <div>Moeda</div>
+            <div>Câmbio Comercial</div>
+            <div>% Compra (Com IOF)</div>
+            <div>Cotação Final (Compra)</div>
+            <div>% Venda (Com IOF)</div>
+            <div>Cotação Final (Venda)</div>
           </div>
 
           <!-- USD -->
-          <div class="grid grid-cols-4 gap-4 items-center">
+          <div class="grid grid-cols-6 gap-4 py-2 border-b">
+            <!-- Moeda -->
             <div class="flex items-center gap-2">
               <span class="fi fi-us w-5 h-5 rounded-sm"></span>
               <div>
@@ -70,43 +73,43 @@
                 <p class="text-sm text-gray-500">Dólar Americano</p>
               </div>
             </div>
+            <!-- Cotação Base -->
+            <div class="text-gray-700">
+              {{ formatarMoeda(cotacoes?.USD || 0) }}
+            </div>
+            <!-- % Compra -->
             <div>
-              <div class="relative mt-1 rounded-md shadow-sm max-w-[160px]">
-                <input
-                  type="number"
-                  v-model="taxasForm.USD"
-                  step="0.01"
-                  min="0"
-                  class="block w-full rounded-md border-0 py-2.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
-                  placeholder="0.00"
-                  @input="simularCotacao('USD')"
-                />
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span class="text-gray-500 sm:text-sm">%</span>
-                </div>
-              </div>
+              <input
+                type="number"
+                v-model="taxasForm.USD_COMPRA"
+                @input="() => simularCotacao('USD')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
             </div>
+            <!-- Cotação Final (Compra) -->
             <div class="text-gray-700 font-medium">
-              <div class="flex items-center gap-2">
-                {{ formatarMoeda(cotacoes?.USD || 0) }}
-                <span v-if="atualizando" class="text-xs text-primary-600">
-                  <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-              </div>
+              {{ formatarMoeda(simulacoes.USD_COMPRA) }}
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium" :class="{'text-green-600': simulacoes.USD > (cotacoes?.USD || 0), 'text-red-600': simulacoes.USD < (cotacoes?.USD || 0)}">
-                {{ formatarMoeda(simulacoes.USD || calcularCotacaoFinal('USD')) }}
-              </span>
-              <span v-if="simulacoes.USD !== calcularCotacaoFinal('USD')" class="text-xs text-gray-500">(simulação)</span>
+            <!-- % Venda -->
+            <div>
+              <input
+                type="number"
+                v-model="taxasForm.USD"
+                @input="() => simularCotacao('USD')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
+            </div>
+            <!-- Cotação Final (Venda) -->
+            <div class="text-gray-700 font-medium">
+              {{ formatarMoeda(simulacoes.USD) }}
             </div>
           </div>
 
           <!-- EUR -->
-          <div class="grid grid-cols-4 gap-4 items-center">
+          <div class="grid grid-cols-6 gap-4 py-2 border-b">
+            <!-- Moeda -->
             <div class="flex items-center gap-2">
               <span class="fi fi-eu w-5 h-5 rounded-sm"></span>
               <div>
@@ -114,43 +117,43 @@
                 <p class="text-sm text-gray-500">Euro</p>
               </div>
             </div>
+            <!-- Cotação Base -->
+            <div class="text-gray-700">
+              {{ formatarMoeda(cotacoes?.EUR || 0) }}
+            </div>
+            <!-- % Compra -->
             <div>
-              <div class="relative mt-1 rounded-md shadow-sm max-w-[160px]">
-                <input
-                  type="number"
-                  v-model="taxasForm.EUR"
-                  step="0.01"
-                  min="0"
-                  class="block w-full rounded-md border-0 py-2.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
-                  placeholder="0.00"
-                  @input="simularCotacao('EUR')"
-                />
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span class="text-gray-500 sm:text-sm">%</span>
-                </div>
-              </div>
+              <input
+                type="number"
+                v-model="taxasForm.EUR_COMPRA"
+                @input="() => simularCotacao('EUR')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
             </div>
+            <!-- Cotação Final (Compra) -->
             <div class="text-gray-700 font-medium">
-              <div class="flex items-center gap-2">
-                {{ formatarMoeda(cotacoes?.EUR || 0) }}
-                <span v-if="atualizando" class="text-xs text-primary-600">
-                  <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-              </div>
+              {{ formatarMoeda(simulacoes.EUR_COMPRA) }}
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium" :class="{'text-green-600': simulacoes.EUR > (cotacoes?.EUR || 0), 'text-red-600': simulacoes.EUR < (cotacoes?.EUR || 0)}">
-                {{ formatarMoeda(simulacoes.EUR || calcularCotacaoFinal('EUR')) }}
-              </span>
-              <span v-if="simulacoes.EUR !== calcularCotacaoFinal('EUR')" class="text-xs text-gray-500">(simulação)</span>
+            <!-- % Venda -->
+            <div>
+              <input
+                type="number"
+                v-model="taxasForm.EUR"
+                @input="() => simularCotacao('EUR')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
+            </div>
+            <!-- Cotação Final (Venda) -->
+            <div class="text-gray-700 font-medium">
+              {{ formatarMoeda(simulacoes.EUR) }}
             </div>
           </div>
 
           <!-- GBP -->
-          <div class="grid grid-cols-4 gap-4 items-center">
+          <div class="grid grid-cols-6 gap-4 py-2 border-b">
+            <!-- Moeda -->
             <div class="flex items-center gap-2">
               <span class="fi fi-gb w-5 h-5 rounded-sm"></span>
               <div>
@@ -158,38 +161,37 @@
                 <p class="text-sm text-gray-500">Libra Esterlina</p>
               </div>
             </div>
+            <!-- Cotação Base -->
+            <div class="text-gray-700">
+              {{ formatarMoeda(cotacoes?.GBP || 0) }}
+            </div>
+            <!-- % Compra -->
             <div>
-              <div class="relative mt-1 rounded-md shadow-sm max-w-[160px]">
-                <input
-                  type="number"
-                  v-model="taxasForm.GBP"
-                  step="0.01"
-                  min="0"
-                  class="block w-full rounded-md border-0 py-2.5 pl-3 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
-                  placeholder="0.00"
-                  @input="simularCotacao('GBP')"
-                />
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <span class="text-gray-500 sm:text-sm">%</span>
-                </div>
-              </div>
+              <input
+                type="number"
+                v-model="taxasForm.GBP_COMPRA"
+                @input="() => simularCotacao('GBP')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
             </div>
+            <!-- Cotação Final (Compra) -->
             <div class="text-gray-700 font-medium">
-              <div class="flex items-center gap-2">
-                {{ formatarMoeda(cotacoes?.GBP || 0) }}
-                <span v-if="atualizando" class="text-xs text-primary-600">
-                  <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-              </div>
+              {{ formatarMoeda(simulacoes.GBP_COMPRA) }}
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium" :class="{'text-green-600': simulacoes.GBP > (cotacoes?.GBP || 0), 'text-red-600': simulacoes.GBP < (cotacoes?.GBP || 0)}">
-                {{ formatarMoeda(simulacoes.GBP || calcularCotacaoFinal('GBP')) }}
-              </span>
-              <span v-if="simulacoes.GBP !== calcularCotacaoFinal('GBP')" class="text-xs text-gray-500">(simulação)</span>
+            <!-- % Venda -->
+            <div>
+              <input
+                type="number"
+                v-model="taxasForm.GBP"
+                @input="() => simularCotacao('GBP')"
+                class="w-20 px-2 py-1 border rounded"
+                step="0.01"
+              />
+            </div>
+            <!-- Cotação Final (Venda) -->
+            <div class="text-gray-700 font-medium">
+              {{ formatarMoeda(simulacoes.GBP) }}
             </div>
           </div>
         </div>
@@ -253,44 +255,72 @@ const {
 const salvando = ref(false)
 const taxasForm = ref({
   USD: 0,
+  USD_COMPRA: 0,
   EUR: 0,
-  GBP: 0
+  EUR_COMPRA: 0,
+  GBP: 0,
+  GBP_COMPRA: 0
 })
 
 // Estado para simulações
 const simulacoes = ref({
-  USD: 0,
-  EUR: 0,
-  GBP: 0
+  USD: null as number | null,
+  USD_COMPRA: null as number | null,
+  EUR: null as number | null,
+  EUR_COMPRA: null as number | null,
+  GBP: null as number | null,
+  GBP_COMPRA: null as number | null
 })
 
-// Resetar simulações
-const resetarSimulacoes = () => {
-  simulacoes.value = {
-    USD: 0,
-    EUR: 0,
-    GBP: 0
+// Calcular cotação final
+const calcularCotacao = (moeda: string, operacao: 'venda' | 'compra' = 'venda') => {
+  if (!cotacoes.value) return 0
+  
+  const cotacaoBase = operacao === 'venda' ? 
+    cotacoes.value[moeda] : 
+    cotacoes.value[`${moeda}_BID`]
+  
+  const taxa = operacao === 'venda' ? 
+    Number(taxasForm.value[moeda] || 0) : 
+    Number(taxasForm.value[`${moeda}_COMPRA`] || 0)
+  
+  if (operacao === 'venda') {
+    return cotacaoBase * (1 + taxa / 100)
+  } else {
+    return cotacaoBase * (1 - taxa / 100)
   }
 }
 
 // Simular cotação com novo percentual
 const simularCotacao = (moeda: 'USD' | 'EUR' | 'GBP') => {
   if (!cotacoes.value) return
-  const taxa = Number(taxasForm.value[moeda] || 0)
-  // Atualiza a taxa temporária imediatamente
-  atualizarTaxaTemporaria(moeda, taxa)
-  // Atualiza a simulação
-  const cotacaoBase = cotacoes.value[moeda] || 0
-  simulacoes.value[moeda] = cotacaoBase * (1 + taxa / 100)
+  simulacoes.value[moeda] = calcularCotacao(moeda, 'venda')
+  simulacoes.value[`${moeda}_COMPRA`] = calcularCotacao(moeda, 'compra')
 }
+
+// Resetar simulações
+const resetarSimulacoes = () => {
+  if (!cotacoes.value) return
+  simularCotacao('USD')
+  simularCotacao('EUR')
+  simularCotacao('GBP')
+}
+
+// Atualizar simulações quando as cotações mudarem
+watch(cotacoes, () => {
+  resetarSimulacoes()
+}, { deep: true })
 
 // Inicializar valores do formulário quando as taxas forem carregadas
 watch(taxas, (novasTaxas) => {
-  if (novasTaxas) {
+  if (novasTaxas && !taxasForm.value.USD) {
     taxasForm.value = {
       USD: novasTaxas.USD || 0,
+      USD_COMPRA: novasTaxas.USD_COMPRA || 0,
       EUR: novasTaxas.EUR || 0,
-      GBP: novasTaxas.GBP || 0
+      EUR_COMPRA: novasTaxas.EUR_COMPRA || 0,
+      GBP: novasTaxas.GBP || 0,
+      GBP_COMPRA: novasTaxas.GBP_COMPRA || 0
     }
     resetarSimulacoes()
   }
@@ -302,29 +332,11 @@ const salvarConfiguracoes = async () => {
   
   salvando.value = true
   try {
-    const dados = {
-      USD: Number(taxasForm.value.USD || 0),
-      EUR: Number(taxasForm.value.EUR || 0),
-      GBP: Number(taxasForm.value.GBP || 0)
-    }
-
-    // Validar valores
-    for (const [moeda, valor] of Object.entries(dados)) {
-      if (isNaN(valor) || valor < 0) {
-        throw new Error(`Valor inválido para ${moeda}. Por favor, insira um número positivo.`)
-      }
-    }
-    
-    // Salvar no Firestore
-    const sucesso = await salvarTaxas(dados)
-    if (sucesso) {
-      // Resetar simulações após atualização bem-sucedida
-      resetarSimulacoes()
-      // Feedback visual
-      alert('Configurações salvas com sucesso!')
-    } else {
-      throw new Error('Erro ao salvar configurações')
-    }
+    // Mantém os valores exatos do formulário
+    const taxasAtualizadas = { ...taxasForm.value }
+    await salvarTaxas(taxasAtualizadas)
+    resetarSimulacoes()
+    alert('Configurações salvas com sucesso!')
   } catch (error) {
     console.error('Erro ao salvar configurações:', error)
     alert(error instanceof Error ? error.message : 'Erro ao salvar configurações. Tente novamente.')

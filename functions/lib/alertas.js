@@ -31,8 +31,10 @@ const functions = __importStar(require("firebase-functions"));
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
 const node_fetch_1 = __importDefault(require("node-fetch"));
-// Inicializar Firebase Admin
-(0, app_1.initializeApp)();
+// Inicializar Firebase Admin apenas se não estiver inicializado
+if ((0, app_1.getApps)().length === 0) {
+    (0, app_1.initializeApp)();
+}
 // Referência ao Firestore
 const db = (0, firestore_1.getFirestore)();
 const { collection, query, where, getDocs, updateDoc } = require('firebase-admin/firestore');
@@ -96,7 +98,7 @@ async function buscarCotacaoAtual(moeda, produto) {
 }
 // Função principal para verificar alertas
 exports.verificarAlertas = functions.pubsub
-    .schedule('every 5 minutes')
+    .schedule('every 1 minutes')
     .onRun(async (context) => {
     console.log('Iniciando verificação de alertas...');
     try {

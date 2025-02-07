@@ -8,6 +8,9 @@ interface Taxas {
   USD: number
   EUR: number
   GBP: number
+  USD_COMPRA: number
+  EUR_COMPRA: number
+  GBP_COMPRA: number
 }
 
 // Interface para cotações
@@ -15,11 +18,28 @@ interface Cotacoes {
   USD: number
   EUR: number
   GBP: number
+  USD_BID: number
+  EUR_BID: number
+  GBP_BID: number
 }
 
 // Valores iniciais
-const TAXAS_INICIAIS: Taxas = { USD: 0, EUR: 0, GBP: 0 }
-const COTACOES_INICIAIS: Cotacoes = { USD: 0, EUR: 0, GBP: 0 }
+const TAXAS_INICIAIS: Taxas = { 
+  USD: 0, 
+  EUR: 0, 
+  GBP: 0,
+  USD_COMPRA: 0,
+  EUR_COMPRA: 0,
+  GBP_COMPRA: 0
+}
+const COTACOES_INICIAIS: Cotacoes = { 
+  USD: 0, 
+  EUR: 0, 
+  GBP: 0,
+  USD_BID: 0,
+  EUR_BID: 0,
+  GBP_BID: 0
+}
 
 // Função para buscar taxas do Firestore
 export const buscarTaxas = async (): Promise<Taxas> => {
@@ -32,7 +52,10 @@ export const buscarTaxas = async (): Promise<Taxas> => {
       return {
         USD: Number(data.USD || 0),
         EUR: Number(data.EUR || 0),
-        GBP: Number(data.GBP || 0)
+        GBP: Number(data.GBP || 0),
+        USD_COMPRA: Number(data.USD_COMPRA || 0),
+        EUR_COMPRA: Number(data.EUR_COMPRA || 0),
+        GBP_COMPRA: Number(data.GBP_COMPRA || 0)
       }
     }
     
@@ -52,14 +75,20 @@ export const buscarCotacoes = async (): Promise<Cotacoes> => {
         const response = await fetch(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`)
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
         const data = await response.json()
-        return data[`${moeda}BRL`]?.ask || 0
+        return {
+          ask: data[`${moeda}BRL`]?.ask || 0,
+          bid: data[`${moeda}BRL`]?.bid || 0
+        }
       })
     )
     
     return {
-      USD: Number(resultados[0]),
-      EUR: Number(resultados[1]),
-      GBP: Number(resultados[2])
+      USD: Number(resultados[0].ask),
+      EUR: Number(resultados[1].ask),
+      GBP: Number(resultados[2].ask),
+      USD_BID: Number(resultados[0].bid),
+      EUR_BID: Number(resultados[1].bid),
+      GBP_BID: Number(resultados[2].bid)
     }
   } catch (error) {
     console.error('Erro ao buscar cotações:', error)
@@ -113,16 +142,27 @@ export const useCotacoesTempoReal = () => {
   }
 
   // Calcular cotação final com base na taxa
-  const calcularCotacaoFinal = (moeda: keyof Cotacoes): number => {
-    const cotacaoBase = cotacoes.value[moeda] || 0
-    const taxa = taxasTemporarias.value[moeda] || 0
-    return cotacaoBase * (1 + taxa / 100)
+  const calcularCotacaoFinal = (moeda: keyof Cotacoes, operacao: 'venda' | 'compra' = 'venda'): number => {
+    if (operacao === 'venda') {
+      const cotacaoBase = cotacoes.value[moeda] || 0
+      const taxa = taxasTemporarias.value[moeda] || 0
+      return cotacaoBase * (1 + taxa / 100)
+    } else {
+      const cotacaoBase = cotacoes.value[`${moeda}_BID`] || 0
+      const taxa = taxasTemporarias.value[`${moeda}_COMPRA`] || 0
+      return cotacaoBase * (1 - taxa / 100)
+    }
   }
 
   // Calcular cotação final com base na taxa e cotação base fornecida
-  const calcularCotacaoFinalComBase = (moeda: keyof Cotacoes, cotacaoBase: number): number => {
-    const taxa = taxasTemporarias.value[moeda] || 0
-    return cotacaoBase * (1 + taxa / 100)
+  const calcularCotacaoFinalComBase = (moeda: keyof Cotacoes, cotacaoBase: number, operacao: 'venda' | 'compra' = 'venda'): number => {
+    if (operacao === 'venda') {
+      const taxa = taxasTemporarias.value[moeda] || 0
+      return cotacaoBase * (1 + taxa / 100)
+    } else {
+      const taxa = taxasTemporarias.value[`${moeda}_COMPRA`] || 0
+      return cotacaoBase * (1 - taxa / 100)
+    }
   }
 
   // Atualizar taxa temporária
@@ -155,7 +195,10 @@ export const useCotacoesTempoReal = () => {
         const novasTaxas = {
           USD: Number(data.USD || 0),
           EUR: Number(data.EUR || 0),
-          GBP: Number(data.GBP || 0)
+          GBP: Number(data.GBP || 0),
+          USD_COMPRA: Number(data.USD_COMPRA || 0),
+          EUR_COMPRA: Number(data.EUR_COMPRA || 0),
+          GBP_COMPRA: Number(data.GBP_COMPRA || 0)
         }
         taxas.value = novasTaxas
         taxasTemporarias.value = { ...novasTaxas }

@@ -283,6 +283,12 @@ const verificarAlertas = async () => {
   console.log('[App] Verificando alertas...')
   
   try {
+    // Verifica se o usuário está autenticado
+    if (!authStore.user?.uid) {
+      console.log('[App] Usuário não autenticado, pulando verificação de alertas')
+      return
+    }
+
     // Busca cotações atualizadas
     await cotacoesService.buscarCotacoes()
     
@@ -302,6 +308,12 @@ const verificarAlertas = async () => {
 
 // Inicia a verificação periódica
 const iniciarVerificacaoPeriodica = () => {
+  // Só inicia se o usuário estiver autenticado
+  if (!authStore.user?.uid) {
+    console.log('[App] Usuário não autenticado, não iniciando verificação periódica')
+    return
+  }
+
   console.log('[App] Iniciando verificação periódica de alertas...')
   // Verifica a cada 30 segundos
   intervalId.value = window.setInterval(verificarAlertas, 30000)
@@ -316,11 +328,22 @@ const pararVerificacaoPeriodica = () => {
   }
 }
 
-// Quando o componente é montado, inicia imediatamente
+// Observa mudanças no estado de autenticação
+watch(() => authStore.user, (newUser) => {
+  if (newUser) {
+    console.log('[App] Usuário autenticado, iniciando verificações...')
+    verificarAlertas()
+    iniciarVerificacaoPeriodica()
+  } else {
+    console.log('[App] Usuário desconectado, parando verificações...')
+    pararVerificacaoPeriodica()
+  }
+}, { immediate: true })
+
+// Quando o componente é montado
 onMounted(async () => {
   console.log('[App] Montando App.vue...')
-  await verificarAlertas() // Verifica imediatamente
-  iniciarVerificacaoPeriodica() // Inicia verificação periódica
+  // Não precisa fazer nada aqui, o watch já vai cuidar de tudo
 })
 
 // Limpar intervalo ao desmontar o componente

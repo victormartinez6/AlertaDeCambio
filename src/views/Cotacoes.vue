@@ -78,27 +78,24 @@
                   card-type="turismo"
                   :variacao="moeda.variacao"
                 >
-                  <div class="flex items-center gap-3 mb-4">
-                    <CurrencyFlag 
-                      :code="moeda.code"
-                      :currencyName="moeda.name"
-                      class="w-8 h-8"
-                    />
-                    <div>
-                      <h3 :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-lg font-semibold']">
-                        {{ moeda.name }}
-                      </h3>
-                      <p :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-sm']">
-                        {{ moeda.code }}/BRL
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="mt-6">
-                    <div class="flex items-center justify-between">
-                      <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-4xl font-bold']">
-                        {{ formatarCotacao(moeda.venda) }}
-                      </span>
+                  <div class="flex flex-col">
+                    <!-- Cabeçalho com Moeda e Variação -->
+                    <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center gap-3">
+                        <CurrencyFlag 
+                          :code="moeda.code"
+                          :currencyName="moeda.name"
+                          class="w-10 h-10"
+                        />
+                        <div>
+                          <h3 :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-2xl font-bold']">
+                            {{ moeda.name }}
+                          </h3>
+                          <p :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-sm font-medium']">
+                            {{ moeda.code }}/BRL
+                          </p>
+                        </div>
+                      </div>
                       <span :class="[
                         moeda.variacao > 0 
                           ? (turismoDark ? 'bg-green-900 text-green-300 ring-green-400/20' : 'bg-green-50 text-green-700 ring-green-600/20')
@@ -109,6 +106,28 @@
                                  class="h-5 w-5 mr-1.5" />
                         {{ moeda.variacao.toFixed(2) }}%
                       </span>
+                    </div>
+
+                    <!-- Cotações -->
+                    <div class="flex justify-between mt-4">
+                      <!-- Cotação de Compra -->
+                      <div class="flex flex-col items-start">
+                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-base font-medium uppercase tracking-wider mb-1']">
+                          Compra
+                        </span>
+                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-4xl font-bold']">
+                          {{ formatarCotacao(moeda.compra) }}
+                        </span>
+                      </div>
+                      <!-- Cotação de Venda -->
+                      <div class="flex flex-col items-end">
+                        <span :class="[turismoDark ? 'text-gray-400' : 'text-marinho/70', 'text-base font-medium uppercase tracking-wider mb-1']">
+                          Venda
+                        </span>
+                        <span :class="[turismoDark ? 'text-gray-100' : 'text-marinho', 'text-4xl font-bold']">
+                          {{ formatarCotacao(moeda.venda) }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </GlowCard>

@@ -1,10 +1,12 @@
 import * as functions from 'firebase-functions'
-import { initializeApp } from 'firebase-admin/app'
+import { getApps, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import fetch from 'node-fetch'
 
-// Inicializar Firebase Admin
-initializeApp()
+// Inicializar Firebase Admin apenas se não estiver inicializado
+if (getApps().length === 0) {
+  initializeApp()
+}
 
 // Referência ao Firestore
 const db = getFirestore()
@@ -36,7 +38,7 @@ async function buscarTaxas(): Promise<Record<string, number>> {
 }
 
 // Função para buscar cotação atual
-async function buscarCotacaoAtual(moeda: string, produto: string): Promise<number | null> {
+async function buscarCotacaoAtual(moeda: string, produto: string, operacao: 'compra' | 'venda' = 'venda'): Promise<number | null> {
   try {
     const response = await fetch(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`)
     if (!response.ok) {
@@ -52,22 +54,27 @@ async function buscarCotacaoAtual(moeda: string, produto: string): Promise<numbe
       return null
     }
 
-    // Se for remessas, retorna a cotação comercial de venda diretamente
+    // Se for remessas, retorna a cotação comercial diretamente
     if (produto === 'remessas') {
-      const cotacaoComercial = Number(cotacao.ask)
-      console.log(`Cotação comercial (ask) para ${moeda}: ${cotacaoComercial}`)
+      const cotacaoComercial = operacao === 'compra' ? Number(cotacao.bid) : Number(cotacao.ask)
+      console.log(`Cotação comercial (${operacao}) para ${moeda}: ${cotacaoComercial}`)
       return cotacaoComercial
     }
 
     // Se for turismo, aplica a taxa
     const taxas = await buscarTaxas()
-    const taxa = taxas[moeda] || 0
-    const cotacaoBase = Number(cotacao.ask)
-    const cotacaoFinal = cotacaoBase * (1 + taxa / 100)
+    const taxa = operacao === 'compra' ? 
+      taxas[`${moeda}_COMPRA`] || 0 : 
+      taxas[moeda] || 0
+    
+    const cotacaoBase = operacao === 'compra' ? Number(cotacao.bid) : Number(cotacao.ask)
+    const cotacaoFinal = operacao === 'compra' ? 
+      cotacaoBase * (1 - taxa / 100) : // Para compra, subtrai a taxa
+      cotacaoBase * (1 + taxa / 100)   // Para venda, soma a taxa
 
-    console.log(`Cotação base para ${moeda}: ${cotacaoBase}`)
-    console.log(`Taxa para ${moeda}: ${taxa}%`)
-    console.log(`Cotação final calculada para ${moeda}: ${cotacaoFinal}`)
+    console.log(`Cotação base para ${moeda} (${operacao}): ${cotacaoBase}`)
+    console.log(`Taxa para ${moeda} (${operacao}): ${taxa}%`)
+    console.log(`Cotação final calculada para ${moeda} (${operacao}): ${cotacaoFinal}`)
 
     return cotacaoFinal
   } catch (error) {
@@ -76,9 +83,23 @@ async function buscarCotacaoAtual(moeda: string, produto: string): Promise<numbe
   }
 }
 
+// Função para verificar se a data está expirada
+function verificarDataExpirada(dataLimite: string | null): boolean {
+  if (!dataLimite) return false
+  
+  const dataLimiteObj = new Date(dataLimite)
+  const agora = new Date()
+  
+  // Compara apenas as datas, ignorando o horário
+  const dataLimiteSemHora = new Date(dataLimiteObj.getFullYear(), dataLimiteObj.getMonth(), dataLimiteObj.getDate())
+  const agoraSemHora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+  
+  return agoraSemHora > dataLimiteSemHora
+}
+
 // Função principal para verificar alertas
 export const verificarAlertas = functions.pubsub
-  .schedule('every 5 minutes')
+  .schedule('every 1 minutes')
   .onRun(async (context) => {
     console.log('Iniciando verificação de alertas...')
     
@@ -90,6 +111,44 @@ export const verificarAlertas = functions.pubsub
       const promises = querySnapshot.docs.map(async (doc: any) => {
         const alerta = doc.data()
         console.log(`Verificando alerta ${doc.id} para ${alerta.moeda} (${alerta.produto})`)
+        
+        // Verifica se a data expirou
+        if (alerta.dataLimite && verificarDataExpirada(alerta.dataLimite)) {
+          console.log(`Data expirada para alerta ${doc.id}`)
+          
+          // Marca o alerta como inativo e registra a expiração
+          await updateDoc(doc.ref, {
+            ativo: false,
+            dataExpirada: true,
+            horarioExpiracao: new Date().toISOString()
+          })
+
+          // Dispara webhook de expiração se configurado
+          if (alerta.webhook) {
+            try {
+              const response = await fetch(alerta.webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  alerta_id: doc.id,
+                  tipo: 'data_expirada',
+                  moeda: alerta.moeda,
+                  data_limite: alerta.dataLimite,
+                  horario_expiracao: new Date().toISOString()
+                })
+              })
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+              }
+
+              console.log(`Webhook de expiração disparado com sucesso para ${doc.id}`)
+            } catch (error) {
+              console.error(`Erro ao disparar webhook de expiração para ${doc.id}:`, error)
+            }
+            return
+          }
+        }
         
         // Busca cotação atual baseada no produto
         const cotacaoAtual = await buscarCotacaoAtual(alerta.moeda, alerta.produto)
