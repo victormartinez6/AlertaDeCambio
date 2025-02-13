@@ -47,9 +47,8 @@ export const useAlertasStore = defineStore('alertas', {
       
       try {
         const authStore = useAuthStore()
-        if (!authStore.user?.uid) {
-          throw new Error('Usuário não autenticado')
-        }
+        // Gerar um ID anônimo se o usuário não estiver logado
+        const userId = authStore.user?.uid || 'anonymous-' + new Date().getTime()
 
         const alerta = {
           nome: dados.nome || '',
@@ -64,7 +63,7 @@ export const useAlertasStore = defineStore('alertas', {
           notificarWhatsapp: Boolean(dados.notificarWhatsapp),
           ativo: true,
           webhookDisparado: false,
-          userId: authStore.user.uid,
+          userId: userId,
           criadoEm: new Date().toISOString(),
           produto: dados.produto,
           dataLimite: dados.dataLimite || new Date().toISOString().split('T')[0]
@@ -92,18 +91,26 @@ export const useAlertasStore = defineStore('alertas', {
       
       try {
         const authStore = useAuthStore()
-        if (!authStore.user?.uid) {
-          throw new Error('Usuário não autenticado')
+        const userId = authStore.user?.uid
+
+        let q
+        if (userId) {
+          // Se o usuário estiver logado, busca todos os alertas
+          q = query(
+            collection(db, 'alertas')
+          )
+        } else {
+          // Se não estiver logado, busca apenas alertas anônimos recentes
+          q = query(
+            collection(db, 'alertas'),
+            where('userId', '>=', 'anonymous-'),
+            where('userId', '<', 'anonymous-\uf8ff')
+          )
         }
 
-        const q = query(
-          collection(db, 'alertas'),
-          where('userId', '==', authStore.user.uid)
-        )
-        
         const querySnapshot = await getDocs(q)
         
-        // Filtramos os inativos e ordenamos por criadoEm na memória
+        // Restaurando o tratamento de datas e filtros
         this.alertas = querySnapshot.docs
           .map(doc => {
             const data = doc.data()
@@ -134,7 +141,16 @@ export const useAlertasStore = defineStore('alertas', {
               criadoEm
             }
           })
-          .filter(alerta => alerta.ativo !== false)
+          .filter(alerta => {
+            // Para usuários não logados, filtra apenas alertas das últimas 24 horas
+            if (!userId && alerta.criadoEm) {
+              const timeThreshold = new Date()
+              timeThreshold.setHours(timeThreshold.getHours() - 24)
+              return alerta.ativo !== false && alerta.criadoEm.getTime() >= timeThreshold.getTime()
+            }
+            // Para usuários logados, mostra todos os alertas ativos
+            return alerta.ativo !== false
+          })
           .sort((a, b) => b.criadoEm.getTime() - a.criadoEm.getTime()) as AlertaData[]
 
       } catch (error: any) {

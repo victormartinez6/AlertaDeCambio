@@ -14,8 +14,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verificarAlertas = void 0;
+exports.limparAlertasExpirados = exports.verificarAlertas = void 0;
 __exportStar(require("./taxas"), exports);
 var alertas_1 = require("./alertas");
 Object.defineProperty(exports, "verificarAlertas", { enumerable: true, get: function () { return alertas_1.verificarAlertas; } });
+Object.defineProperty(exports, "limparAlertasExpirados", { enumerable: true, get: function () { return alertas_1.limparAlertasExpirados; } });
 //# sourceMappingURL=index.js.map

@@ -491,6 +491,9 @@ async function criarAlerta() {
 
     // Criar alerta
     await alertasStore.criarAlerta(dados)
+    
+    // Atualiza a lista de alertas
+    await alertasStore.listarAlertas()
 
     showModal.value = true
     modalMessage.value = 'Alerta criado com sucesso!'

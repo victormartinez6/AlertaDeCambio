@@ -10,7 +10,7 @@ if (getApps().length === 0) {
 
 // Referência ao Firestore
 const db = getFirestore()
-const { collection, query, where, getDocs, updateDoc } = require('firebase-admin/firestore')
+const { collection, query, where, getDocs, updateDoc, deleteDoc, doc } = require('firebase-admin/firestore')
 
 // Função para buscar taxas do Firestore
 async function buscarTaxas(): Promise<Record<string, number>> {
@@ -207,5 +207,56 @@ export const verificarAlertas = functions.pubsub
     } catch (error) {
       console.error('Erro ao verificar alertas:', error)
       throw error
+    }
+  })
+
+// Função para limpar alertas expirados ou já disparados
+export const limparAlertasExpirados = functions.pubsub
+  .schedule('every 1 hours')
+  .onRun(async (context) => {
+    try {
+      const alertasRef = collection(db, 'alertas')
+      const agora = new Date()
+
+      // Busca todos os alertas
+      const querySnapshot = await getDocs(alertasRef)
+      const alertasParaExcluir: string[] = []
+
+      querySnapshot.forEach((doc: FirebaseFirestore.QueryDocumentSnapshot) => {
+        const alerta = doc.data()
+        const dataLimite = new Date(alerta.dataLimite)
+        const dataDisparo = alerta.horarioDisparo ? new Date(alerta.horarioDisparo) : null
+
+        // Caso 1: Data limite expirada há mais de 24 horas
+        if (dataLimite) {
+          const horasDesdeExpiracao = (agora.getTime() - dataLimite.getTime()) / (1000 * 60 * 60)
+          if (horasDesdeExpiracao > 24) {
+            alertasParaExcluir.push(doc.id)
+            return
+          }
+        }
+
+        // Caso 2: Webhook disparado há mais de 24 horas
+        if (dataDisparo) {
+          const horasDesdeDisparo = (agora.getTime() - dataDisparo.getTime()) / (1000 * 60 * 60)
+          if (horasDesdeDisparo > 24) {
+            alertasParaExcluir.push(doc.id)
+            return
+          }
+        }
+      })
+
+      // Exclui os alertas em lote
+      const operacoes = alertasParaExcluir.map(alertaId => 
+        deleteDoc(doc(db, 'alertas', alertaId))
+      )
+
+      await Promise.all(operacoes)
+
+      console.log(`Limpeza automática: ${alertasParaExcluir.length} alertas excluídos`)
+      return null
+    } catch (error) {
+      console.error('Erro ao limpar alertas:', error)
+      return null
     }
   })

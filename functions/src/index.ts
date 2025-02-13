@@ -1,2 +1,2 @@
 export * from './taxas'
-export { verificarAlertas } from './alertas'
+export { verificarAlertas, limparAlertasExpirados } from './alertas'
