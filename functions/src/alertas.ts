@@ -166,12 +166,13 @@ export const verificarAlertas = functions.pubsub
         // Formatar cotações com 4 casas decimais
         const cotacaoAtualFormatada = Number(cotacaoAtual).toFixed(4)
         const cotacaoAlvoFormatada = Number(alerta.cotacaoAlvo).toFixed(4)
+        const cotacaoAtualNaCriacaoFormatada = Number(alerta.cotacaoAtualNaCriacao).toFixed(4)
 
         console.log(`Cotação alvo para ${alerta.moeda}: ${cotacaoAlvoFormatada}`)
-        console.log(`Comparação: ${cotacaoAtualFormatada} <= ${cotacaoAlvoFormatada} = ${cotacaoAtualFormatada <= cotacaoAlvoFormatada}`)
+        console.log(`Comparação: ${cotacaoAtualFormatada} <= ${cotacaoAlvoFormatada} = ${Number(cotacaoAtualFormatada) <= Number(cotacaoAlvoFormatada)}`)
 
         // Verifica se a cotação atual atingiu o alvo
-        if (cotacaoAtualFormatada <= cotacaoAlvoFormatada) {
+        if (Number(cotacaoAtualFormatada) <= Number(cotacaoAlvoFormatada)) {
           console.log(`Cotação atingiu o alvo para ${alerta.moeda}!`)
           
           // Marca o alerta como inativo e registra o momento do disparo
@@ -193,7 +194,8 @@ export const verificarAlertas = functions.pubsub
                   tipo: 'cotacao_atingida',
                   moeda: alerta.moeda,
                   cotacao_alvo: cotacaoAlvoFormatada,
-                  cotacao_disparo: cotacaoAtualFormatada,
+                  cotacao_atual: cotacaoAtualFormatada,
+                  cotacao_criacao: cotacaoAtualNaCriacaoFormatada,
                   horario_disparo: new Date().toISOString()
                 })
               })

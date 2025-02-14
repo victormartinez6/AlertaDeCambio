@@ -8,8 +8,8 @@ export interface WebhookPayload {
 }
 
 // Função auxiliar para formatar cotações
-function formatarCotacao(valor: number): number {
-  return Number(Number(valor).toFixed(4))
+function formatarCotacao(valor: number): string {
+  return valor.toFixed(4)
 }
 
 export async function dispatchWebhookEvent(userId: string, event: string, data: any) {
@@ -18,14 +18,14 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
     
     // Formatar cotações no payload
     if (data) {
-      if (data.cotacaoAlvo) {
-        data.cotacaoAlvo = formatarCotacao(data.cotacaoAlvo)
+      if (data.cotacaoAlvo !== undefined) {
+        data.cotacaoAlvo = formatarCotacao(Number(data.cotacaoAlvo))
       }
-      if (data.cotacaoAtualNaCriacao) {
-        data.cotacaoAtualNaCriacao = formatarCotacao(data.cotacaoAtualNaCriacao)
+      if (data.cotacaoAtualNaCriacao !== undefined) {
+        data.cotacaoAtualNaCriacao = formatarCotacao(Number(data.cotacaoAtualNaCriacao))
       }
-      if (data.cotacaoAtual) {
-        data.cotacaoAtual = formatarCotacao(data.cotacaoAtual)
+      if (data.cotacaoAtual !== undefined) {
+        data.cotacaoAtual = formatarCotacao(Number(data.cotacaoAtual))
       }
     }
     
