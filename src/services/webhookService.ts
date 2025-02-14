@@ -7,9 +7,27 @@ export interface WebhookPayload {
   timestamp: Date
 }
 
+// Função auxiliar para formatar cotações
+function formatarCotacao(valor: number): number {
+  return Number(Number(valor).toFixed(4))
+}
+
 export async function dispatchWebhookEvent(userId: string, event: string, data: any) {
   try {
     console.log('Iniciando disparo de webhook:', { userId, event, data })
+    
+    // Formatar cotações no payload
+    if (data) {
+      if (data.cotacaoAlvo) {
+        data.cotacaoAlvo = formatarCotacao(data.cotacaoAlvo)
+      }
+      if (data.cotacaoAtualNaCriacao) {
+        data.cotacaoAtualNaCriacao = formatarCotacao(data.cotacaoAtualNaCriacao)
+      }
+      if (data.cotacaoAtual) {
+        data.cotacaoAtual = formatarCotacao(data.cotacaoAtual)
+      }
+    }
     
     // Buscar todos os webhooks
     console.log('Buscando todos os webhooks')

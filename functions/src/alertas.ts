@@ -163,11 +163,15 @@ export const verificarAlertas = functions.pubsub
           return
         }
 
-        console.log(`Cotação alvo para ${alerta.moeda}: ${alerta.cotacaoAlvo}`)
-        console.log(`Comparação: ${cotacaoAtual} <= ${alerta.cotacaoAlvo} = ${cotacaoAtual <= alerta.cotacaoAlvo}`)
+        // Formatar cotações com 4 casas decimais
+        const cotacaoAtualFormatada = Number(cotacaoAtual).toFixed(4)
+        const cotacaoAlvoFormatada = Number(alerta.cotacaoAlvo).toFixed(4)
+
+        console.log(`Cotação alvo para ${alerta.moeda}: ${cotacaoAlvoFormatada}`)
+        console.log(`Comparação: ${cotacaoAtualFormatada} <= ${cotacaoAlvoFormatada} = ${cotacaoAtualFormatada <= cotacaoAlvoFormatada}`)
 
         // Verifica se a cotação atual atingiu o alvo
-        if (cotacaoAtual <= alerta.cotacaoAlvo) {
+        if (cotacaoAtualFormatada <= cotacaoAlvoFormatada) {
           console.log(`Cotação atingiu o alvo para ${alerta.moeda}!`)
           
           // Marca o alerta como inativo e registra o momento do disparo
@@ -175,7 +179,7 @@ export const verificarAlertas = functions.pubsub
             ativo: false,
             webhookDisparado: true,
             horarioDisparo: new Date().toISOString(),
-            cotacaoDisparo: cotacaoAtual
+            cotacaoDisparo: cotacaoAtualFormatada
           })
 
           // Dispara webhook se configurado
@@ -188,8 +192,8 @@ export const verificarAlertas = functions.pubsub
                   alerta_id: doc.id,
                   tipo: 'cotacao_atingida',
                   moeda: alerta.moeda,
-                  cotacao_alvo: alerta.cotacaoAlvo,
-                  cotacao_disparo: cotacaoAtual,
+                  cotacao_alvo: cotacaoAlvoFormatada,
+                  cotacao_disparo: cotacaoAtualFormatada,
                   horario_disparo: new Date().toISOString()
                 })
               })
