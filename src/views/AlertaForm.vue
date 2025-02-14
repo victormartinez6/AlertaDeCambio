@@ -595,6 +595,24 @@ function formatarMoeda(valor: number): string {
   })
 }
 
+// Watch para marcar checkbox de email automaticamente
+watch(() => formData.value.email, (newValue) => {
+  if (newValue && emailValido) {
+    formData.value.notificarEmail = true
+  } else {
+    formData.value.notificarEmail = false
+  }
+})
+
+// Watch para marcar checkbox de whatsapp automaticamente
+watch([() => formData.value.ddi, () => formData.value.whatsapp], ([newDDI, newWhatsapp]) => {
+  if (newDDI && newWhatsapp && whatsappValido) {
+    formData.value.notificarWhatsapp = true
+  } else {
+    formData.value.notificarWhatsapp = false
+  }
+}, { immediate: true })
+
 onMounted(() => {
   cambioStore.iniciarAtualizacoesAutomaticas()
 })
