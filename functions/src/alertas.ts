@@ -146,9 +146,9 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhook de expiração se configurado
-          if (webhook) {
+          if (webhook && webhook.url) {
             try {
-              const response = await fetch(webhook, {
+              const response = await fetch(webhook.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -196,9 +196,9 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhooks se configurados
-          if (webhook) {
+          if (webhook && webhook.url) {
             try {
-              const response = await fetch(webhook, {
+              const response = await fetch(webhook.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
