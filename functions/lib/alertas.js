@@ -31,9 +31,14 @@ const functions = __importStar(require("firebase-functions"));
 const app_1 = require("firebase-admin/app");
 const firestore_1 = require("firebase-admin/firestore");
 const node_fetch_1 = __importDefault(require("node-fetch"));
+const firebase_admin_1 = __importDefault(require("firebase-admin"));
 // Inicializar Firebase Admin apenas se não estiver inicializado
 if ((0, app_1.getApps)().length === 0) {
-    (0, app_1.initializeApp)();
+    console.log('Inicializando Firebase Admin...');
+    (0, app_1.initializeApp)({
+        credential: firebase_admin_1.default.credential.applicationDefault()
+    });
+    console.log('Firebase Admin inicializado com sucesso');
 }
 // Referência ao Firestore
 const db = (0, firestore_1.getFirestore)();
@@ -123,6 +128,19 @@ exports.verificarAlertas = functions.pubsub
         const promises = querySnapshot.docs.map(async (doc) => {
             const alerta = doc.data();
             console.log(`Verificando alerta ${doc.id} para ${alerta.moeda} (${alerta.produto})`);
+            // Verifica se o alerta possui um webhook associado
+            if (!alerta.webhookId) {
+                console.log(`Alerta ${doc.id} não possui webhook configurado, continuando...`);
+                return;
+            }
+            // Buscar webhook apenas se o alerta tiver um webhookId
+            const webhookRef = db.collection('webhooks').doc(alerta.webhookId);
+            const webhookDoc = await webhookRef.get();
+            if (!webhookDoc.exists) {
+                console.log(`Webhook ${alerta.webhookId} não encontrado para o alerta ${doc.id}`);
+                return;
+            }
+            const webhook = webhookDoc.data();
             // Verifica se a data expirou
             if (alerta.dataLimite && verificarDataExpirada(alerta.dataLimite)) {
                 console.log(`Data expirada para alerta ${doc.id}`);
@@ -133,9 +151,9 @@ exports.verificarAlertas = functions.pubsub
                     horarioExpiracao: new Date().toISOString()
                 });
                 // Dispara webhook de expiração se configurado
-                if (alerta.webhook) {
+                if (webhook) {
                     try {
-                        const response = await (0, node_fetch_1.default)(alerta.webhook, {
+                        const response = await (0, node_fetch_1.default)(webhook, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -176,9 +194,9 @@ exports.verificarAlertas = functions.pubsub
                     cotacaoDisparo: cotacaoAtual
                 });
                 // Dispara webhooks se configurados
-                if (alerta.webhook) {
+                if (webhook) {
                     try {
-                        const response = await (0, node_fetch_1.default)(alerta.webhook, {
+                        const response = await (0, node_fetch_1.default)(webhook, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

@@ -2,10 +2,15 @@ import * as functions from 'firebase-functions'
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import fetch from 'node-fetch'
+import admin from 'firebase-admin'
 
 // Inicializar Firebase Admin apenas se não estiver inicializado
 if (getApps().length === 0) {
-  initializeApp()
+  console.log('Inicializando Firebase Admin...')
+  initializeApp({
+    credential: admin.credential.applicationDefault()
+  })
+  console.log('Firebase Admin inicializado com sucesso')
 }
 
 // Referência ao Firestore
@@ -112,6 +117,23 @@ export const verificarAlertas = functions.pubsub
         const alerta = doc.data()
         console.log(`Verificando alerta ${doc.id} para ${alerta.moeda} (${alerta.produto})`)
         
+        // Verifica se o alerta possui um webhook associado
+        if (!alerta.webhookId) {
+          console.log(`Alerta ${doc.id} não possui webhook configurado, continuando...`)
+          return
+        }
+
+        // Buscar webhook apenas se o alerta tiver um webhookId
+        const webhookRef = db.collection('webhooks').doc(alerta.webhookId)
+        const webhookDoc = await webhookRef.get()
+        
+        if (!webhookDoc.exists) {
+          console.log(`Webhook ${alerta.webhookId} não encontrado para o alerta ${doc.id}`)
+          return
+        }
+
+        const webhook = webhookDoc.data()
+
         // Verifica se a data expirou
         if (alerta.dataLimite && verificarDataExpirada(alerta.dataLimite)) {
           console.log(`Data expirada para alerta ${doc.id}`)
@@ -124,9 +146,9 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhook de expiração se configurado
-          if (alerta.webhook) {
+          if (webhook) {
             try {
-              const response = await fetch(alerta.webhook, {
+              const response = await fetch(webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -174,9 +196,9 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhooks se configurados
-          if (alerta.webhook) {
+          if (webhook) {
             try {
-              const response = await fetch(alerta.webhook, {
+              const response = await fetch(webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
