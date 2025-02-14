@@ -69,6 +69,11 @@ export const useAlertasStore = defineStore('alertas', {
           dataLimite: dados.dataLimite || new Date().toISOString().split('T')[0]
         }
 
+        // Para usuários anônimos, sempre salvar o webhook no próprio alerta
+        if (userId.startsWith('anonymous-') && dados.webhook) {
+          alerta.webhook = dados.webhook
+        }
+
         const alertasRef = collection(db, 'alertas')
         const docRef = await addDoc(alertasRef, alerta)
 
