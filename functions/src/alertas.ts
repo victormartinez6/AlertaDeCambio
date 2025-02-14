@@ -197,31 +197,21 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhook se configurado
-          if (alerta.webhook) {
-            try {
-              const response = await fetch(alerta.webhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  alerta_id: doc.id,
-                  tipo: 'cotacao_atingida',
-                  moeda: getNomeMoeda(alerta.moeda),
-                  moeda_codigo: alerta.moeda,
-                  cotacao_alvo: cotacaoAlvoFormatada,
-                  cotacao_atual: cotacaoAtualFormatada,
-                  cotacao_criacao: cotacaoAtualNaCriacaoFormatada,
-                  horario_disparo: new Date().toISOString()
-                })
+          try {
+            if (alerta.userId) {
+              await dispatchWebhookEvent(alerta.userId, 'alert.triggered', {
+                alerta_id: doc.id,
+                tipo: 'cotacao_atingida',
+                moeda: getNomeMoeda(alerta.moeda),
+                moeda_codigo: alerta.moeda,
+                cotacao_alvo: cotacaoAlvoFormatada,
+                cotacao_atual: cotacaoAtualFormatada,
+                cotacao_criacao: cotacaoAtualNaCriacaoFormatada,
+                horario_disparo: new Date().toISOString()
               })
-
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-              }
-
-              console.log(`Webhook disparado com sucesso para ${doc.id}`)
-            } catch (error) {
-              console.error(`Erro ao disparar webhook para ${doc.id}:`, error)
             }
+          } catch (error) {
+            console.error(`Erro ao disparar webhook para ${doc.id}:`, error)
           }
         }
       })

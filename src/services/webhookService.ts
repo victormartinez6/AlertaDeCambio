@@ -7,6 +7,18 @@ export interface WebhookPayload {
   timestamp: Date
 }
 
+// Mapeamento de moedas
+const MOEDAS: { [key: string]: string } = {
+  'USD': 'Dólar Americano (USD)',
+  'EUR': 'Euro (EUR)',
+  'GBP': 'Libra Esterlina (GBP)'
+}
+
+// Função para obter o nome completo da moeda
+function getNomeMoeda(codigo: string): string {
+  return MOEDAS[codigo] || codigo
+}
+
 // Função auxiliar para formatar cotações
 function formatarCotacao(valor: number): string {
   return valor.toFixed(4)
@@ -26,6 +38,10 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
       }
       if (data.cotacaoAtual !== undefined) {
         data.cotacaoAtual = formatarCotacao(Number(data.cotacaoAtual))
+      }
+      // Formatar nome da moeda se presente
+      if (data.moeda) {
+        data.moeda = getNomeMoeda(data.moeda)
       }
     }
     
