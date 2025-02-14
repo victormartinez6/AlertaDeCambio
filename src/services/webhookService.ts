@@ -48,6 +48,7 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
         console.error('Erro ao enviar webhook direto:', error)
         throw error
       }
+      return
     }
     
     // Para usuários autenticados, continua usando a coleção webhooks
