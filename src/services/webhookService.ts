@@ -11,36 +11,60 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
   try {
     console.log('Iniciando disparo de webhook:', { userId, event, data })
     
-    // Buscar webhooks do usuário
-    console.log('Buscando webhooks para o usuário:', userId)
+    let webhooks = []
     
-    const q = query(
+    // Se for um usuário autenticado, busca os webhooks dele
+    if (!userId.startsWith('anonymous-')) {
+      console.log('Buscando webhooks para o usuário:', userId)
+      
+      const q = query(
+        collection(db, 'webhooks'),
+        where('userId', '==', userId)
+      )
+      
+      console.log('Query preparada:', q)
+      const querySnapshot = await getDocs(q)
+      console.log('Query executada, número de resultados:', querySnapshot.size)
+      
+      const webhooksData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      console.log('Webhooks antes do filtro:', JSON.stringify(webhooksData, null, 2))
+      
+      webhooks = webhooksData.filter(webhook => {
+        console.log(`\nVerificando webhook ${webhook.id}:`)
+        console.log('URL:', webhook.url)
+        console.log('Eventos configurados:', webhook.events || [])
+        console.log('Evento a ser disparado:', event)
+        
+        const eventosConfigurados = Array.isArray(webhook.events) ? webhook.events : []
+        const eventoHabilitado = eventosConfigurados.includes(event)
+        
+        console.log('Evento está habilitado?', eventoHabilitado)
+        return eventoHabilitado
+      })
+    }
+
+    // Para usuários não autenticados, dispara para webhooks globais
+    const globalWebhooksQuery = query(
       collection(db, 'webhooks'),
-      where('userId', '==', userId)
+      where('global', '==', true)
     )
     
-    console.log('Query preparada:', q)
-    const querySnapshot = await getDocs(q)
-    console.log('Query executada, número de resultados:', querySnapshot.size)
-    
-    const webhooksData = querySnapshot.docs.map(doc => ({
+    const globalWebhooksSnapshot = await getDocs(globalWebhooksQuery)
+    const globalWebhooksData = globalWebhooksSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }))
-    console.log('Webhooks antes do filtro:', JSON.stringify(webhooksData, null, 2))
     
-    const webhooks = webhooksData.filter(webhook => {
-      console.log(`\nVerificando webhook ${webhook.id}:`)
-      console.log('URL:', webhook.url)
-      console.log('Eventos configurados:', webhook.events || [])
-      console.log('Evento a ser disparado:', event)
-      
+    const globalWebhooks = globalWebhooksData.filter(webhook => {
       const eventosConfigurados = Array.isArray(webhook.events) ? webhook.events : []
-      const eventoHabilitado = eventosConfigurados.includes(event)
-      
-      console.log('Evento está habilitado?', eventoHabilitado)
-      return eventoHabilitado
+      return eventosConfigurados.includes(event)
     })
+
+    // Combina webhooks do usuário (se autenticado) com webhooks globais
+    webhooks = [...webhooks, ...globalWebhooks]
 
     console.log('\nWebhooks encontrados após filtro:', JSON.stringify(webhooks, null, 2))
 
