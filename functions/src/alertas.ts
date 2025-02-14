@@ -17,6 +17,18 @@ if (getApps().length === 0) {
 const db = getFirestore()
 const { collection, query, where, getDocs, updateDoc, deleteDoc, doc } = require('firebase-admin/firestore')
 
+// Mapeamento de moedas
+const MOEDAS: { [key: string]: string } = {
+  'USD': 'Dólar Americano (USD)',
+  'EUR': 'Euro (EUR)',
+  'GBP': 'Libra Esterlina (GBP)'
+}
+
+// Função para obter o nome completo da moeda
+function getNomeMoeda(codigo: string): string {
+  return MOEDAS[codigo] || codigo
+}
+
 // Função para buscar taxas do Firestore
 async function buscarTaxas(): Promise<Record<string, number>> {
   try {
@@ -137,7 +149,8 @@ export const verificarAlertas = functions.pubsub
                 body: JSON.stringify({
                   alerta_id: doc.id,
                   tipo: 'data_expirada',
-                  moeda: alerta.moeda,
+                  moeda: getNomeMoeda(alerta.moeda),
+                  moeda_codigo: alerta.moeda,
                   data_limite: alerta.dataLimite,
                   horario_expiracao: new Date().toISOString()
                 })
@@ -192,7 +205,8 @@ export const verificarAlertas = functions.pubsub
                 body: JSON.stringify({
                   alerta_id: doc.id,
                   tipo: 'cotacao_atingida',
-                  moeda: alerta.moeda,
+                  moeda: getNomeMoeda(alerta.moeda),
+                  moeda_codigo: alerta.moeda,
                   cotacao_alvo: cotacaoAlvoFormatada,
                   cotacao_atual: cotacaoAtualFormatada,
                   cotacao_criacao: cotacaoAtualNaCriacaoFormatada,

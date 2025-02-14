@@ -138,9 +138,9 @@
                   required
                 >
                   <option value="">Selecione uma moeda</option>
-                  <option value="USD">Dólar Americano (USD)</option>
-                  <option value="EUR">Euro (EUR)</option>
-                  <option value="GBP">Libra Esterlina (GBP)</option>
+                  <option v-for="moeda in Object.values(MOEDAS)" :key="moeda.codigo" :value="moeda.codigo">
+                    {{ getNomeMoeda(moeda.codigo) }}
+                  </option>
                 </select>
               </div>
 
@@ -322,6 +322,7 @@ import { ref, computed, watch, onMounted, useAttrs } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAlertasStore } from '@/stores/alertas'
 import { useCambioStore } from '@/stores/cambioStore'
+import { MOEDAS, getNomeMoeda } from '@/utils/moedas'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { 
   ArrowLeftIcon, 
