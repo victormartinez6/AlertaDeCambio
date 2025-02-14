@@ -208,7 +208,9 @@
                   </p>
                   <p class="mt-2 text-gray-600">
                     A nossa empresa está comprometida a proteger e respeitar sua privacidade, seus dados são usados apenas para fins de marketing. 
-                    <a href="#" class="text-primary-600 hover:text-primary-700 font-medium">Acesse nossa política de LGPD</a> para saber mais.
+                    <a href="https://www.cambiohoje.com.br/privacidade" target="_blank" class="text-primary-600 hover:text-primary-700 font-medium">
+                      Acesse nossa política de LGPD
+                    </a>
                   </p>
                 </div>
               </div>
@@ -350,7 +352,7 @@ const formData = ref({
   nome: '',
   email: '',
   whatsapp: '',
-  ddi: '55',
+  ddi: '',
   moeda: '',
   cotacaoAlvo: '',
   dataLimite: hoje.value,
@@ -441,7 +443,7 @@ function limparFormulario() {
     nome: '',
     email: '',
     whatsapp: '',
-    ddi: '55',
+    ddi: '',
     moeda: '',
     cotacaoAlvo: '',
     dataLimite: hoje.value,
