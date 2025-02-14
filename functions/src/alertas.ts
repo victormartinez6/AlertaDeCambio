@@ -116,23 +116,6 @@ export const verificarAlertas = functions.pubsub
       const promises = querySnapshot.docs.map(async (doc: any) => {
         const alerta = doc.data()
         console.log(`Verificando alerta ${doc.id} para ${alerta.moeda} (${alerta.produto})`)
-        
-        // Verifica se o alerta possui um webhook associado
-        if (!alerta.webhookId) {
-          console.log(`Alerta ${doc.id} não possui webhook configurado, continuando...`)
-          return
-        }
-
-        // Buscar webhook apenas se o alerta tiver um webhookId
-        const webhookRef = db.collection('webhooks').doc(alerta.webhookId)
-        const webhookDoc = await webhookRef.get()
-        
-        if (!webhookDoc.exists) {
-          console.log(`Webhook ${alerta.webhookId} não encontrado para o alerta ${doc.id}`)
-          return
-        }
-
-        const webhook = webhookDoc.data()
 
         // Verifica se a data expirou
         if (alerta.dataLimite && verificarDataExpirada(alerta.dataLimite)) {
@@ -146,9 +129,9 @@ export const verificarAlertas = functions.pubsub
           })
 
           // Dispara webhook de expiração se configurado
-          if (webhook && webhook.url) {
+          if (alerta.webhook) {
             try {
-              const response = await fetch(webhook.url, {
+              const response = await fetch(alerta.webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -195,14 +178,15 @@ export const verificarAlertas = functions.pubsub
             cotacaoDisparo: cotacaoAtual
           })
 
-          // Dispara webhooks se configurados
-          if (webhook && webhook.url) {
+          // Dispara webhook se configurado
+          if (alerta.webhook) {
             try {
-              const response = await fetch(webhook.url, {
+              const response = await fetch(alerta.webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   alerta_id: doc.id,
+                  tipo: 'cotacao_atingida',
                   moeda: alerta.moeda,
                   cotacao_alvo: alerta.cotacaoAlvo,
                   cotacao_disparo: cotacaoAtual,
@@ -219,8 +203,6 @@ export const verificarAlertas = functions.pubsub
               console.error(`Erro ao disparar webhook para ${doc.id}:`, error)
             }
           }
-        } else {
-          console.log('Cotação ainda não atingiu o alvo')
         }
       })
 
@@ -228,7 +210,6 @@ export const verificarAlertas = functions.pubsub
       console.log('Verificação de alertas concluída')
     } catch (error) {
       console.error('Erro ao verificar alertas:', error)
-      throw error
     }
   })
 
