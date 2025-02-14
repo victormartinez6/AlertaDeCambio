@@ -10,9 +10,49 @@ export interface WebhookPayload {
 export async function dispatchWebhookEvent(userId: string, event: string, data: any) {
   try {
     console.log('Iniciando disparo de webhook:', { userId, event, data })
+
+    // Se for um usuário anônimo e o alerta tem webhook direto, usa ele
+    if (userId.startsWith('anonymous-') && data.webhook) {
+      console.log('Usuário anônimo, usando webhook direto do alerta:', data.webhook)
+      
+      const payload: WebhookPayload = {
+        event,
+        data,
+        timestamp: new Date()
+      }
+
+      console.log('Payload preparado:', payload)
+      
+      try {
+        const response = await fetch(data.webhook, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Event': event
+          },
+          body: JSON.stringify(payload)
+        })
+
+        console.log('Resposta do webhook direto:', {
+          status: response.status,
+          ok: response.ok
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        console.log('Webhook direto enviado com sucesso')
+        return response
+      } catch (error) {
+        console.error('Erro ao enviar webhook direto:', error)
+        throw error
+      }
+    }
+    
+    // Para usuários autenticados, continua usando a coleção webhooks
     console.log('Buscando webhooks para o usuário:', userId)
     
-    // Busca webhooks do usuário que estão inscritos no evento
     const q = query(
       collection(db, 'webhooks'),
       where('userId', '==', userId)
@@ -22,7 +62,6 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
     const querySnapshot = await getDocs(q)
     console.log('Query executada, número de resultados:', querySnapshot.size)
     
-    // Filtra os webhooks que têm o evento na lista de events
     const webhooksData = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -35,7 +74,6 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
       console.log('Eventos configurados:', webhook.events || [])
       console.log('Evento a ser disparado:', event)
       
-      // Verifica se o webhook tem a propriedade events e se o evento está incluído
       const eventosConfigurados = Array.isArray(webhook.events) ? webhook.events : []
       const eventoHabilitado = eventosConfigurados.includes(event)
       
@@ -45,14 +83,11 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
 
     console.log('\nWebhooks encontrados após filtro:', JSON.stringify(webhooks, null, 2))
 
-    console.log('Webhooks encontrados:', webhooks)
-
     if (webhooks.length === 0) {
       console.warn('Nenhum webhook configurado para este evento')
       return
     }
 
-    // Prepara o payload
     const payload: WebhookPayload = {
       event,
       data,
@@ -61,7 +96,6 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
 
     console.log('Payload preparado:', payload)
 
-    // Dispara o webhook para cada URL configurada
     const promises = webhooks.map(webhook => {
       console.log(`Disparando para URL ${webhook.url}`)
       console.log('Headers:', {
@@ -91,15 +125,13 @@ export async function dispatchWebhookEvent(userId: string, event: string, data: 
       })
       .catch(error => {
         console.error(`Erro ao enviar webhook ${webhook.id} para ${webhook.url}:`, error)
-        // Não rejeitamos a promise para não interromper os outros envios
-        return error
+        throw error
       })
     })
 
-    // Aguarda todos os envios terminarem
     const results = await Promise.all(promises)
     console.log('Resultados dos webhooks:', results)
-    console.log('Todos os webhooks foram processados')
+    return results
   } catch (error) {
     console.error('Erro ao despachar evento webhook:', error)
     throw error
