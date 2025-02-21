@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="560" version="1.1" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg">
+ <rect width="800" height="560" fill="#039"/>
+ <g transform="matrix(30 0 0 30 400 280)" fill="#fc0">
+  <g id="s">
+   <g id="c">
+    <path id="t" d="M0,0v1h0.5z" transform="rotate(18 0,-1)"/>
+    <use transform="scale(-1,1)" href="#t"/>
+   </g>
+   <use transform="rotate(72)" href="#c"/>
+   <use transform="rotate(144)" href="#c"/>
+   <use transform="rotate(216)" href="#c"/>
+   <use transform="rotate(288)" href="#c"/>
+  </g>
+  <g id="m">
+   <use transform="rotate(36)" href="#s"/>
+   <use transform="rotate(72)" href="#s"/>
+   <use transform="rotate(108)" href="#s"/>
+   <use transform="rotate(144)" href="#s"/>
+   <use transform="rotate(180)" href="#s"/>
+   <use transform="rotate(216)" href="#s"/>
+   <use transform="rotate(252)" href="#s"/>
+   <use transform="rotate(288)" href="#s"/>
+   <use transform="rotate(324)" href="#s"/>
+  </g>
+ </g>
+</svg>

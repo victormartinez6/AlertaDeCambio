@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="560" version="1.1" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg">
+ <rect width="800" height="560" fill="#fff"/>
+ <g fill="#bf0a30">
+  <rect width="800" height="43.077"/>
+  <rect y="86.154" width="800" height="43.077"/>
+  <rect y="172.31" width="800" height="43.077"/>
+  <rect y="258.46" width="800" height="43.077"/>
+  <rect y="344.62" width="800" height="43.077"/>
+  <rect y="430.77" width="800" height="43.077"/>
+  <rect y="516.92" width="800" height="43.077"/>
+ </g>
+ <rect width="342.86" height="301.54" fill="#002868"/>
+ <g fill="#fff">
+  <g id="s5">
+   <g id="s4">
+    <g id="s3">
+     <g id="s2">
+      <g id="s1">
+       <g id="s">
+        <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+        <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+       </g>
+       <g transform="translate(76.19)">
+        <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+        <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+       </g>
+      </g>
+      <g transform="translate(152.38)">
+       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+      </g>
+     </g>
+     <g transform="translate(0,37.692)">
+      <g>
+       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+      </g>
+      <g transform="translate(76.19)">
+       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+      </g>
+     </g>
+    </g>
+    <g transform="translate(0,75.385)">
+     <g>
+      <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+      <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+     </g>
+     <g transform="translate(76.19)">
+      <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+      <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+     </g>
+    </g>
+   </g>
+   <g transform="translate(0,150.77)">
+    <g>
+     <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+     <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+    </g>
+    <g transform="translate(76.19)">
+     <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+     <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>
