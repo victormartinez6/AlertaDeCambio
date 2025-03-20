@@ -43,6 +43,16 @@ if ((0, app_1.getApps)().length === 0) {
 // Referência ao Firestore
 const db = (0, firestore_1.getFirestore)();
 const { collection, query, where, getDocs, updateDoc, deleteDoc, doc } = require('firebase-admin/firestore');
+// Mapeamento de moedas
+const MOEDAS = {
+    'USD': 'Dólar Americano (USD)',
+    'EUR': 'Euro (EUR)',
+    'GBP': 'Libra Esterlina (GBP)'
+};
+// Função para obter o nome completo da moeda
+function getNomeMoeda(codigo) {
+    return MOEDAS[codigo] || codigo;
+}
 // Função para buscar taxas do Firestore
 async function buscarTaxas() {
     try {
@@ -128,19 +138,6 @@ exports.verificarAlertas = functions.pubsub
         const promises = querySnapshot.docs.map(async (doc) => {
             const alerta = doc.data();
             console.log(`Verificando alerta ${doc.id} para ${alerta.moeda} (${alerta.produto})`);
-            // Verifica se o alerta possui um webhook associado
-            if (!alerta.webhookId) {
-                console.log(`Alerta ${doc.id} não possui webhook configurado, continuando...`);
-                return;
-            }
-            // Buscar webhook apenas se o alerta tiver um webhookId
-            const webhookRef = db.collection('webhooks').doc(alerta.webhookId);
-            const webhookDoc = await webhookRef.get();
-            if (!webhookDoc.exists) {
-                console.log(`Webhook ${alerta.webhookId} não encontrado para o alerta ${doc.id}`);
-                return;
-            }
-            const webhook = webhookDoc.data();
             // Verifica se a data expirou
             if (alerta.dataLimite && verificarDataExpirada(alerta.dataLimite)) {
                 console.log(`Data expirada para alerta ${doc.id}`);
@@ -151,15 +148,16 @@ exports.verificarAlertas = functions.pubsub
                     horarioExpiracao: new Date().toISOString()
                 });
                 // Dispara webhook de expiração se configurado
-                if (webhook) {
+                if (alerta.webhook) {
                     try {
-                        const response = await (0, node_fetch_1.default)(webhook, {
+                        const response = await (0, node_fetch_1.default)(alerta.webhook, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 alerta_id: doc.id,
                                 tipo: 'data_expirada',
-                                moeda: alerta.moeda,
+                                moeda: getNomeMoeda(alerta.moeda),
+                                moeda_codigo: alerta.moeda,
                                 data_limite: alerta.dataLimite,
                                 horario_expiracao: new Date().toISOString()
                             })
@@ -181,29 +179,36 @@ exports.verificarAlertas = functions.pubsub
                 console.error(`Não foi possível obter cotação para ${alerta.moeda}`);
                 return;
             }
-            console.log(`Cotação alvo para ${alerta.moeda}: ${alerta.cotacaoAlvo}`);
-            console.log(`Comparação: ${cotacaoAtual} <= ${alerta.cotacaoAlvo} = ${cotacaoAtual <= alerta.cotacaoAlvo}`);
+            // Formatar cotações com 4 casas decimais
+            const cotacaoAtualFormatada = Number(cotacaoAtual).toFixed(4);
+            const cotacaoAlvoFormatada = Number(alerta.cotacaoAlvo).toFixed(4);
+            const cotacaoAtualNaCriacaoFormatada = Number(alerta.cotacaoAtualNaCriacao).toFixed(4);
+            console.log(`Cotação alvo para ${alerta.moeda}: ${cotacaoAlvoFormatada}`);
+            console.log(`Comparação: ${cotacaoAtualFormatada} <= ${cotacaoAlvoFormatada} = ${Number(cotacaoAtualFormatada) <= Number(cotacaoAlvoFormatada)}`);
             // Verifica se a cotação atual atingiu o alvo
-            if (cotacaoAtual <= alerta.cotacaoAlvo) {
+            if (Number(cotacaoAtualFormatada) <= Number(cotacaoAlvoFormatada)) {
                 console.log(`Cotação atingiu o alvo para ${alerta.moeda}!`);
                 // Marca o alerta como inativo e registra o momento do disparo
                 await updateDoc(doc.ref, {
                     ativo: false,
                     webhookDisparado: true,
                     horarioDisparo: new Date().toISOString(),
-                    cotacaoDisparo: cotacaoAtual
+                    cotacaoDisparo: cotacaoAtualFormatada
                 });
-                // Dispara webhooks se configurados
-                if (webhook) {
+                // Dispara webhook se configurado
+                if (alerta.webhook) {
                     try {
-                        const response = await (0, node_fetch_1.default)(webhook, {
+                        const response = await (0, node_fetch_1.default)(alerta.webhook, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 alerta_id: doc.id,
-                                moeda: alerta.moeda,
-                                cotacao_alvo: alerta.cotacaoAlvo,
-                                cotacao_disparo: cotacaoAtual,
+                                tipo: 'cotacao_atingida',
+                                moeda: getNomeMoeda(alerta.moeda),
+                                moeda_codigo: alerta.moeda,
+                                cotacao_alvo: cotacaoAlvoFormatada,
+                                cotacao_atual: cotacaoAtualFormatada,
+                                cotacao_criacao: cotacaoAtualNaCriacaoFormatada,
                                 horario_disparo: new Date().toISOString()
                             })
                         });
@@ -217,16 +222,12 @@ exports.verificarAlertas = functions.pubsub
                     }
                 }
             }
-            else {
-                console.log('Cotação ainda não atingiu o alvo');
-            }
         });
         await Promise.all(promises);
         console.log('Verificação de alertas concluída');
     }
     catch (error) {
         console.error('Erro ao verificar alertas:', error);
-        throw error;
     }
 });
 // Função para limpar alertas expirados ou já disparados

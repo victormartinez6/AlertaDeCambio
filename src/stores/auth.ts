@@ -1,79 +1,85 @@
-import { defineStore } from 'pinia'
-import { auth } from '@/config/firebase'
+import { defineStore } from 'pinia';
+import { auth } from '../firebase/config';
 import { 
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   type User
-} from 'firebase/auth'
+} from 'firebase/auth';
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  isInitialized: boolean;
+}
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null as User | null,
+  state: (): AuthState => ({
+    user: null,
     loading: false,
-    error: null as string | null
+    error: null,
+    isInitialized: false
   }),
-
-  getters: {
-    isAuthenticated: (state) => !!state.user,
-    isAgent: (state) => state.user?.email?.endsWith('@cambiohoje.com.br') || false
-  },
-
+  
   actions: {
     init() {
-      // Observar mudanças no estado de autenticação
-      onAuthStateChanged(auth, (user) => {
-        this.user = user
-      })
+      return new Promise((resolve) => {
+        // Unsubscribe any existing listener
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          console.log('Auth state changed:', user ? 'logged in' : 'logged out');
+          this.user = user;
+          this.isInitialized = true;
+          unsubscribe(); // Unsubscribe after first initialization
+          resolve(user);
+        });
+      });
+    },
+
+    async register(email: string, password: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+        this.user = user;
+        return true;
+      } catch (error: any) {
+        this.error = error.message.replace('Firebase: ', '').replace(/\(auth.*\)/, '').trim();
+        return false;
+      } finally {
+        this.loading = false;
+      }
     },
 
     async login(email: string, password: string) {
-      this.loading = true
-      this.error = null
-
+      this.loading = true;
+      this.error = null;
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password)
-        this.user = userCredential.user
-        
-        if (!this.isAgent) {
-          await this.signOut()
-          throw new Error('Acesso permitido apenas para agentes do Câmbio Hoje')
-        }
+        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        this.user = user;
+        return true;
       } catch (error: any) {
-        console.error('Erro no login:', error)
-        
-        switch (error.code) {
-          case 'auth/invalid-email':
-            this.error = 'Email inválido'
-            break
-          case 'auth/user-disabled':
-            this.error = 'Usuário desabilitado'
-            break
-          case 'auth/user-not-found':
-            this.error = 'Usuário não encontrado'
-            break
-          case 'auth/wrong-password':
-            this.error = 'Senha incorreta'
-            break
-          default:
-            this.error = 'Erro ao fazer login. Tente novamente mais tarde.'
-        }
-        
-        throw error
+        this.error = error.message.replace('Firebase: ', '').replace(/\(auth.*\)/, '').trim();
+        return false;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
-    async signOut() {
+    async logout() {
+      this.loading = true;
+      this.error = null;
       try {
-        await signOut(auth)
-        this.user = null
-      } catch (error) {
-        console.error('Erro ao fazer logout:', error)
-        this.error = error.message || 'Erro ao fazer logout'
-        throw error
+        await signOut(auth);
+        this.user = null;
+        return true;
+      } catch (error: any) {
+        this.error = error.message;
+        return false;
+      } finally {
+        this.loading = false;
       }
     }
   }
-})
+});
