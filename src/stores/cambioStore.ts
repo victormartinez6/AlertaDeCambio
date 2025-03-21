@@ -195,10 +195,18 @@ export const useCambioStore = defineStore('cambio', () => {
       const response = await fetch(`https://economia.awesomeapi.com.br/json/daily/${code}-BRL/7`)
       const data = await response.json()
       
-      historicoCotacoes.value[code] = data.map((item: any) => ({
-        timestamp: new Date(item.timestamp * 1000),
-        valor: parseFloat(item.bid)
-      }))
+      // Mapear e ordenar os dados por data (mais antigo para mais recente)
+      const historicoOrdenado = data
+        .map((item: any) => ({
+          timestamp: new Date(item.timestamp * 1000),
+          ask: item.bid,
+          bid: item.bid,
+          high: item.high,
+          low: item.low
+        }))
+        .sort((a: any, b: any) => a.timestamp.getTime() - b.timestamp.getTime()) // Ordenar do mais antigo para o mais recente
+      
+      historicoCotacoes.value[code] = historicoOrdenado
     } catch (e) {
       console.error(`Erro ao buscar histórico de ${code}:`, e)
     }

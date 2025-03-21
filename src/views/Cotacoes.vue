@@ -281,6 +281,9 @@ import CotacaoChart from '@/components/CotacaoChart.vue'
 import CurrencyChart from '@/components/CurrencyChart.vue'
 import type { CurrencyCode } from '@/types'
 
+// Constantes para moedas
+const MOEDAS_COMERCIAL = ['USD', 'EUR', 'GBP', 'CAD']
+
 const store = useCambioStore()
 const { loading, loadingTurismo, loadingComercial, error, cotacoesTurismo, cotacoes, historicoCotacoes, segundosParaAtualizarComercial } = storeToRefs(store)
 const { segundosParaAtualizar } = useCotacoesTempoReal()
@@ -288,7 +291,12 @@ const { segundosParaAtualizar } = useCotacoesTempoReal()
 // Tema escuro
 const turismoDark = ref(false)
 const comercialDark = ref(false)
-const expandedCards = ref<Record<string, boolean>>({})
+const expandedCards = ref<Record<string, boolean>>({
+  'USD': true, 
+  'EUR': true, 
+  'GBP': true, 
+  'CAD': true  
+})
 
 // Computed para evitar re-renderizações desnecessárias
 const timerDisplay = computed(() => {
@@ -304,8 +312,14 @@ const timerDisplayComercial = computed(() => {
 })
 
 // Inicializar dados
-onMounted(() => {
+onMounted(async () => {
   const cleanup = store.iniciarAtualizacoesAutomaticas()
+  
+  // Carregar histórico de cotações para todas as moedas no carregamento da página
+  await Promise.all(MOEDAS_COMERCIAL.map(async (code: string) => {
+    await store.buscarHistoricoCotacao(code)
+  }))
+  
   onUnmounted(cleanup)
 })
 
@@ -342,3 +356,4 @@ const deveDestacarTurismo = (moeda: string) => {
   return moeda === 'USD' || moeda === 'EUR'
 }
 </script>
+
