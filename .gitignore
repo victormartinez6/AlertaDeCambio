@@ -52,3 +52,9 @@ ui-debug.log*
 Thumbs.db
 .DS_Store
 *.pem
+
+# Diretórios pessoais
+OneDrive/
+Google Drive/
+.bolt/
+desktop.ini
