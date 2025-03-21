@@ -107,26 +107,12 @@ export const useAlertasStore = defineStore('alertas', {
         const promisesExcluir = snapshotExpirados.docs.map(doc => deleteDoc(doc.ref))
         await Promise.all(promisesExcluir)
 
-        // Depois, buscar alertas ativos
-        let q
-        if (userId) {
-          q = query(
-            alertasRef,
-            where('userId', '==', userId),
-            orderBy('criadoEm', 'desc')
-          )
-        } else {
-          const timeThreshold = new Date()
-          timeThreshold.setHours(timeThreshold.getHours() - 24)
-          
-          q = query(
-            alertasRef,
-            where('userId', '>=', 'anonymous-'),
-            where('userId', '<', 'anonymous-\uf8ff'),
-            where('criadoEm', '>=', timeThreshold.toISOString()),
-            orderBy('criadoEm', 'desc')
-          )
-        }
+        // Depois, buscar todos os alertas ativos
+        // Não filtramos mais por userId, mostramos todos os alertas
+        const q = query(
+          alertasRef,
+          orderBy('criadoEm', 'desc')
+        )
 
         const snapshot = await getDocs(q)
         this.alertas = snapshot.docs.map(doc => {
