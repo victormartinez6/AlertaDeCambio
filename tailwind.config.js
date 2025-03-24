@@ -7,66 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Cor principal - Azul profissional
         primary: {
-          50: '#012928',
-          100: '#012928',
-          200: '#012928',
-          300: '#012928',
-          400: '#012928',
-          500: '#012928',
-          600: '#012928',
-          700: '#012928',
-          800: '#012928',
-          900: '#012928',
-          950: '#012928',
+          50: '#654cf0',
+          100: '#654cf0',
+          200: '#654cf0',
+          300: '#654cf0',
+          400: '#654cf0',
+          500: '#654cf0',
+          600: '#654cf0',
+          700: '#654cf0',
+          800: '#654cf0',
+          900: '#654cf0',
+          950: '#654cf0',
         },
-        // Cor secundária - Cinza elegante
-        secondary: {
-          50: '#01FBA1',
-          100: '#01FBA1',
-          200: '#01FBA1',
-          300: '#01FBA1',
-          400: '#01FBA1',
-          500: '#01FBA1',
-          600: '#01FBA1',
-          700: '#01FBA1',
-          800: '#01FBA1',
-          900: '#01FBA1',
-          950: '#01FBA1',
-        },
-        // Cores de status
-        status: {
-          new: '#22c55e',        // Verde para novos leads
-          in_progress: '#3b76ff', // Azul para leads em progresso
-          qualified: '#8b5cf6',   // Roxo para leads qualificados
-          lost: '#ef4444',       // Vermelho para leads perdidos
-          archived: '#6b7280',   // Cinza para leads arquivados
-        },
-        // Cores de destaque
-        accent: {
-          success: '#22c55e',    // Verde
-          warning: '#f59e0b',    // Amarelo
-          error: '#ef4444',      // Vermelho
-          info: '#3b76ff',       // Azul
-        }
+        remessa: '#D6FC49',
+        marinho: '#211B4F'
       },
       animation: {
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
-      keyframes: {
-        glow: {
-          'from': {
-            'box-shadow': '0 0 10px #6366f1, 0 0 20px #6366f1, 0 0 30px #6366f1',
-          },
-          'to': {
-            'box-shadow': '0 0 20px #6366f1, 0 0 30px #6366f1, 0 0 40px #6366f1',
-          },
-        },
-      },
+      boxShadow: {
+        'glow': '0 0 15px -3px rgb(101 76 240 / 0.2), 0 0 6px -4px rgb(101 76 240 / 0.1)',
+      }
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-  ],
+  plugins: [],
 }

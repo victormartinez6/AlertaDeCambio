@@ -1,108 +1,105 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import logoFull from '../assets/images/The Hub Realtors_Logo.svg';
-import bgLogin from '../assets/images/background_login.jpg';
-import logoIcon from '../assets/images/The Hub Realtors_Logo_Icon.svg';
-import bgRegister from '../assets/images/background_register.jpg';
-
-const router = useRouter();
-const authStore = useAuthStore();
-
-const email = ref('');
-const password = ref('');
-const loading = ref(false);
-const error = ref('');
-
-const handleSubmit = async (e: Event) => {
-  e.preventDefault();
-  loading.value = true;
-  error.value = '';
-
-  try {
-    await authStore.login(email.value, password.value);
-    router.push('/');
-  } catch (err) {
-    error.value = 'Invalid email or password';
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleGoogleLogin = async () => {
-  loading.value = true;
-  error.value = '';
-
-  try {
-    await authStore.googleLogin();
-    router.push('/');
-  } catch (err) {
-    error.value = 'Error signing in with Google';
-  } finally {
-    loading.value = false;
-  }
-};
-</script>
-
 <template>
-  <section class="flex flex-col md:flex-row h-screen items-center">
-    <div class="hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
-      <img :src="bgLogin" alt="" class="w-full h-full object-cover">
-    </div>
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Logo e Título -->
+      <div>
+        <img class="mx-auto h-12 w-auto" src="@/assets/Logo_Cambio_Hoje.svg" alt="Câmbio Hoje" />
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Área do Agente
+        </h2>
+      </div>
 
-    <div class="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:mx-0 md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12
-          flex items-center justify-center">
-      <div class="w-full h-100">
-        <div class="flex justify-center mb-12">
-          <img :src="logoFull" alt="The Hub Realtors" class="h-48 w-auto" />
+      <!-- Formulário de Login -->
+      <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
+        <!-- Mensagem de Erro -->
+        <div v-if="authStore.error" class="rounded-md bg-red-50 p-4">
+          <div class="flex">
+            <ExclamationCircleIcon class="h-5 w-5 text-red-400" aria-hidden="true" />
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                {{ authStore.error }}
+              </h3>
+              <div class="mt-2 text-sm text-red-700">
+                <p>Por favor, verifique:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                  <li>Se o email termina com @cambiohoje.com.br</li>
+                  <li>Se o usuário foi criado no Firebase Console</li>
+                  <li>Se a senha está correta</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <form class="mt-6" @submit.prevent="handleSubmit">
-          <div v-if="error" class="mb-4 text-red-500">{{ error }}</div>
-          
+        <div class="rounded-md shadow-sm -space-y-px">
+          <!-- Email -->
           <div>
-            <label class="block text-gray-700">Email</label>
-            <input 
+            <label for="email" class="sr-only">Email</label>
+            <input
+              id="email"
               v-model="email"
-              type="email" 
-              placeholder="Digite seu email" 
-              class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-secondary-50 focus:bg-white focus:outline-none" 
-              autofocus 
+              name="email"
+              type="email"
               required
-            >
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+              placeholder="Email (deve terminar com @cambiohoje.com.br)"
+            />
           </div>
 
-          <div class="mt-4">
-            <label class="block text-gray-700">Senha</label>
-            <input 
+          <!-- Senha -->
+          <div>
+            <label for="password" class="sr-only">Senha</label>
+            <input
+              id="password"
               v-model="password"
-              type="password" 
-              placeholder="Digite sua senha" 
-              minlength="6" 
-              class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-secondary-50 focus:bg-white focus:outline-none" 
+              name="password"
+              type="password"
               required
-            >
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+              placeholder="Senha"
+            />
           </div>
+        </div>
 
-          <div class="text-right mt-2">
-            <a href="#" class="text-sm font-semibold text-gray-700 hover:text-primary-600 focus:text-primary-600">Esqueceu a senha?</a>
-          </div>
-
-          <button 
-            type="submit" 
-            class="w-full block bg-primary-600 hover:bg-primary-700 focus:bg-primary-700 text-white font-semibold rounded-lg px-4 py-3 mt-6"
-            :disabled="loading"
+        <!-- Botão de Login -->
+        <div>
+          <button
+            type="submit"
+            :disabled="authStore.loading"
+            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
           >
-            {{ loading ? 'Carregando...' : 'Entrar' }}
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <LockClosedIcon
+                class="h-5 w-5 text-primary-500 group-hover:text-primary-400"
+                aria-hidden="true"
+              />
+            </span>
+            {{ authStore.loading ? 'Entrando...' : 'Entrar' }}
           </button>
-        </form>
-
-        <hr class="my-6 border-gray-300 w-full">
-
-        <p class="mt-8 text-center">Precisa de uma conta? <a href="#" class="text-primary-600 hover:text-primary-700 font-semibold">Criar conta</a></p>
-
-      </div>
+        </div>
+      </form>
     </div>
-  </section>
+  </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { LockClosedIcon, ExclamationCircleIcon } from '@heroicons/vue/24/solid'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const email = ref('')
+const password = ref('')
+
+async function handleLogin() {
+  try {
+    await authStore.login(email.value, password.value)
+    router.push('/agente/dashboard')
+  } catch (error) {
+    // Erro já é tratado na store
+  }
+}
+</script>

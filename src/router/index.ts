@@ -1,73 +1,90 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { auth } from '../firebase/config';
-import type { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    component: () => import('../views/Dashboard.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/login',
-    component: () => import('../views/Login.vue')
-  },
-  {
-    path: '/register',
-    component: () => import('../views/Register.vue')
-  },
-  {
-    path: '/leads',
-    component: () => import('../views/Leads.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/properties',
-    component: () => import('../views/Properties.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/calendar',
-    component: () => import('../views/Calendar.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/learning',
-    component: () => import('../views/Learning.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/settings',
-    component: () => import('../views/Settings.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/currency-exchange',
-    component: () => import('../views/CurrencyExchange.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/webhooks',
-    name: 'webhooks',
-    component: () => import('../views/Webhooks.vue'),
-    meta: { requiresAuth: true }
-  }
-];
+// Views públicas
+import Cotacoes from '@/views/Cotacoes.vue'
+import MeusAlertas from '@/views/MeusAlertas.vue'
+import AlertaForm from '@/views/AlertaForm.vue'
+
+// Views da área do agente
+import AgenteLayout from '@/layouts/AgenteLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
+  routes: [
+    // Rotas públicas
+    { 
+      path: '/', 
+      name: 'home',
+      component: Cotacoes 
+    },
+    { 
+      path: '/alertas', 
+      name: 'alertas',
+      component: MeusAlertas 
+    },
+    { 
+      path: '/novo-alerta', 
+      name: 'novo-alerta',
+      component: AlertaForm 
+    },
+    
+    // Rotas da área do agente
+    {
+      path: '/agente',
+      component: AgenteLayout,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          redirect: '/agente/dashboard'
+        },
+        {
+          path: 'dashboard',
+          name: 'agente-dashboard',
+          component: () => import('@/views/agente/Dashboard.vue')
+        },
+        {
+          path: 'alertas',
+          name: 'agente-alertas',
+          component: () => import('@/views/agente/Alertas.vue')
+        },
+        {
+          path: 'webhook',
+          name: 'webhook',
+          component: () => import('@/views/agente/Webhook.vue')
+        },
+        {
+          path: 'configuracoes',
+          name: 'configuracoes',
+          component: () => import('@/views/agente/Configuracoes.vue')
+        }
+      ]
+    },
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const isAuthenticated = auth.currentUser;
+    // Rota de fallback
+    { 
+      path: '/:pathMatch(.*)*', 
+      redirect: '/' 
+    }
+  ]
+})
 
-  if (requiresAuth && !isAuthenticated) {
-    next('/login');
+// Guarda de navegação para proteger rotas
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (to.meta.requiresAuth) {
+    if (!authStore.isAuthenticated) {
+      next('/')
+    } else if (!authStore.isAgent) {
+      next('/')
+    } else {
+      next()
+    }
   } else {
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

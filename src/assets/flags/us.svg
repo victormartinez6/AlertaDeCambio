@@ -1,68 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="800" height="560" version="1.1" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg">
- <rect width="800" height="560" fill="#fff"/>
- <g fill="#bf0a30">
-  <rect width="800" height="43.077"/>
-  <rect y="86.154" width="800" height="43.077"/>
-  <rect y="172.31" width="800" height="43.077"/>
-  <rect y="258.46" width="800" height="43.077"/>
-  <rect y="344.62" width="800" height="43.077"/>
-  <rect y="430.77" width="800" height="43.077"/>
-  <rect y="516.92" width="800" height="43.077"/>
- </g>
- <rect width="342.86" height="301.54" fill="#002868"/>
- <g fill="#fff">
-  <g id="s5">
-   <g id="s4">
-    <g id="s3">
-     <g id="s2">
-      <g id="s1">
-       <g id="s">
-        <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-        <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-       </g>
-       <g transform="translate(76.19)">
-        <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-        <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-       </g>
-      </g>
-      <g transform="translate(152.38)">
-       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-      </g>
-     </g>
-     <g transform="translate(0,37.692)">
-      <g>
-       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-      </g>
-      <g transform="translate(76.19)">
-       <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-       <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-      </g>
-     </g>
-    </g>
-    <g transform="translate(0,75.385)">
-     <g>
-      <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-      <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-     </g>
-     <g transform="translate(76.19)">
-      <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-      <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-     </g>
-    </g>
-   </g>
-   <g transform="translate(0,150.77)">
-    <g>
-     <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-     <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-    </g>
-    <g transform="translate(76.19)">
-     <polygon points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-     <polygon transform="translate(38.095)" points="19.047 10.447 22.112 19.904 14.635 14.093 23.459 14.093 15.982 19.904"/>
-    </g>
-   </g>
-  </g>
- </g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1235" height="650" viewBox="0 0 7410 3900">
+<rect width="7410" height="3900" fill="#b22234"/>
+<path d="M0,450H7410m0,600H0m0,600H7410m0,600H0m0,600H7410m0,600H0" stroke="#fff" stroke-width="300"/>
+<rect width="2964" height="2100" fill="#3c3b6e"/>
+<g fill="#fff">
+<g id="s18">
+<g id="s9">
+<g id="s5">
+<g id="s4">
+<path id="s" d="M247,90 317.534230,307.082039 132.873218,172.917961H361.126782L176.465770,307.082039z"/>
+<use xlink:href="#s" y="420"/>
+<use xlink:href="#s" y="840"/>
+<use xlink:href="#s" y="1260"/>
+</g>
+<use xlink:href="#s" y="1680"/>
+</g>
+<use xlink:href="#s4" x="247" y="210"/>
+</g>
+<use xlink:href="#s9" x="494"/>
+</g>
+<use xlink:href="#s18" x="988"/>
+<use xlink:href="#s9" x="1976"/>
+<use xlink:href="#s5" x="2470"/>
+</g>
 </svg>
