@@ -1,127 +1,128 @@
-import { ref } from 'vue';
-import { db } from "../firebase/config";
-import { collection, addDoc, updateDoc, doc, deleteDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '@/config/firebase'
+import { collection, getDocs } from 'firebase/firestore'
 
-export interface Webhook {
-  id?: string;
-  name: string;
-  url: string;
-  secret?: string;
-  events: string[];
-  active: boolean;
-  createdAt?: Date;
-  lastTriggered?: Date;
-  failureCount?: number;
+export interface WebhookPayload {
+  event: string
+  data: any
+  timestamp: Date
 }
 
-interface WebhookPayload {
-  event: string;
-  data: any;
-  timestamp: number;
-  signature: string;
+// Mapeamento de moedas
+const MOEDAS: { [key: string]: string } = {
+  'USD': 'Dólar Americano (USD)',
+  'EUR': 'Euro (EUR)',
+  'GBP': 'Libra Esterlina (GBP)'
 }
 
-const webhooksCollection = collection(db, 'webhooks');
+// Função para obter o nome completo da moeda
+function getNomeMoeda(codigo: string): string {
+  return MOEDAS[codigo] || codigo
+}
 
-export const webhookService = {
-  // Criar novo webhook
-  async create(webhook: Omit<Webhook, 'id' | 'createdAt'>): Promise<Webhook> {
-    const newWebhook = {
-      ...webhook,
-      createdAt: new Date(),
-      failureCount: 0
-    };
-    const docRef = await addDoc(webhooksCollection, newWebhook);
-    return { ...newWebhook, id: docRef.id };
-  },
+// Função auxiliar para formatar cotações
+function formatarCotacao(valor: number): string {
+  return valor.toFixed(4)
+}
 
-  // Listar todos os webhooks
-  async list(): Promise<Webhook[]> {
-    const querySnapshot = await getDocs(webhooksCollection);
-    return querySnapshot.docs.map(doc => ({
+export async function dispatchWebhookEvent(userId: string, event: string, data: any) {
+  try {
+    console.log('Iniciando disparo de webhook:', { userId, event, data })
+    
+    // Formatar cotações no payload
+    if (data) {
+      if (data.cotacaoAlvo !== undefined) {
+        data.cotacaoAlvo = formatarCotacao(Number(data.cotacaoAlvo))
+      }
+      if (data.cotacaoAtualNaCriacao !== undefined) {
+        data.cotacaoAtualNaCriacao = formatarCotacao(Number(data.cotacaoAtualNaCriacao))
+      }
+      if (data.cotacaoAtual !== undefined) {
+        data.cotacaoAtual = formatarCotacao(Number(data.cotacaoAtual))
+      }
+      // Formatar nome da moeda se presente
+      if (data.moeda) {
+        data.moeda = getNomeMoeda(data.moeda)
+      }
+    }
+    
+    // Buscar todos os webhooks
+    console.log('Buscando todos os webhooks')
+    
+    const querySnapshot = await getDocs(collection(db, 'webhooks'))
+    console.log('Query executada, número de resultados:', querySnapshot.size)
+    
+    const webhooksData = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })) as Webhook[];
-  },
+    }))
+    console.log('Webhooks antes do filtro:', JSON.stringify(webhooksData, null, 2))
+    
+    const webhooks = webhooksData.filter(webhook => {
+      console.log(`\nVerificando webhook ${webhook.id}:`)
+      console.log('URL:', webhook.url)
+      console.log('Eventos configurados:', webhook.events || [])
+      console.log('Evento a ser disparado:', event)
+      
+      const eventosConfigurados = Array.isArray(webhook.events) ? webhook.events : []
+      const eventoHabilitado = eventosConfigurados.includes(event)
+      
+      console.log('Evento está habilitado?', eventoHabilitado)
+      return eventoHabilitado
+    })
 
-  // Atualizar webhook
-  async update(id: string, webhook: Partial<Webhook>): Promise<void> {
-    const webhookRef = doc(webhooksCollection, id);
-    await updateDoc(webhookRef, webhook);
-  },
+    console.log('\nWebhooks encontrados após filtro:', JSON.stringify(webhooks, null, 2))
 
-  // Excluir webhook
-  async delete(id: string): Promise<void> {
-    const webhookRef = doc(webhooksCollection, id);
-    await deleteDoc(webhookRef);
-  },
-
-  // Enviar payload para webhook
-  async trigger(event: string, payload: any): Promise<void> {
-    try {
-      const webhooks = await this.list();
-      const activeWebhooks = webhooks.filter(webhook => 
-        webhook.active && webhook.events.includes(event)
-      );
-
-      const promises = activeWebhooks.map(async webhook => {
-        try {
-          const signature = await this.generateSignature(payload, webhook.secret || '');
-          
-          const response = await fetch(webhook.url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Hub-Signature': signature,
-              'X-Event-Type': event
-            },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          // Atualizar o webhook com sucesso
-          await this.update(webhook.id, {
-            lastTriggered: new Date(),
-            failureCount: 0
-          });
-
-        } catch (error) {
-          console.error(`Failed to trigger webhook ${webhook.id}:`, error);
-          
-          // Incrementar contador de falhas
-          await this.update(webhook.id, {
-            failureCount: (webhook.failureCount || 0) + 1
-          });
-        }
-      });
-
-      await Promise.all(promises);
-    } catch (error) {
-      console.error('Error triggering webhooks:', error);
-      throw error;
+    if (webhooks.length === 0) {
+      console.warn('Nenhum webhook configurado para este evento')
+      return
     }
-  },
 
-  // Gerar assinatura HMAC para payload
-  async generateSignature(payload: any, secret: string): Promise<string> {
-    if (!secret) return '';
-    
-    const encoder = new TextEncoder();
-    const data = encoder.encode(JSON.stringify(payload));
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    
-    const signature = await crypto.subtle.sign('HMAC', key, data);
-    return Array.from(new Uint8Array(signature))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    const payload: WebhookPayload = {
+      event,
+      data,
+      timestamp: new Date()
+    }
+
+    console.log('Payload preparado:', payload)
+
+    const promises = webhooks.map(webhook => {
+      console.log(`Disparando para URL ${webhook.url}`)
+      console.log('Headers:', {
+        'Content-Type': 'application/json',
+        'X-Webhook-Event': event
+      })
+      console.log('Body:', JSON.stringify(payload))
+      
+      return fetch(webhook.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Event': event
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        console.log(`Resposta do webhook ${webhook.id}:`, {
+          status: response.status,
+          ok: response.ok
+        })
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        console.log(`Webhook ${webhook.id} enviado com sucesso`)
+        return response
+      })
+      .catch(error => {
+        console.error(`Erro ao enviar webhook ${webhook.id} para ${webhook.url}:`, error)
+        throw error
+      })
+    })
+
+    const results = await Promise.all(promises)
+    console.log('Resultados dos webhooks:', results)
+    return results
+  } catch (error) {
+    console.error('Erro ao despachar evento webhook:', error)
+    throw error
   }
-};
+}
