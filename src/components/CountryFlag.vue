@@ -52,9 +52,11 @@ const currencyCode = computed(() => flagMap[props.countryCode]?.currency);
 .flag-image {
   width: 32px;
   height: 24px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .flag-image.small {
