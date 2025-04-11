@@ -536,10 +536,10 @@ export default {
       const scriptTag = 'script';
       const scriptCloseTag = '/' + scriptTag;
       
-      // Determina a URL base do script (local para desenvolvimento, Firebase para produção)
+      // Determina a URL base do script (local para desenvolvimento, Vercel para produção)
       const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? window.location.origin 
-        : 'https://alerta-de-cambio.web.app';
+        : 'https://alerta-de-cambio.vercel.app';
       
       return `<!-- Alerta de Câmbio Widget BEGIN -->
 <div class="alerta-cambio-widget-container" style="max-width: ${configWidget.value.largura === 'custom' ? customWidth.value : configWidget.value.largura}; margin: 0 auto;">
