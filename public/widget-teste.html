@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste do Widget de Cotações</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .widget-container {
+      margin-bottom: 40px;
+    }
+    
+    .example-code {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 40px;
+      overflow: auto;
+    }
+    
+    pre {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teste do Widget de Cotações - Alerta de Câmbio</h1>
+  
+  <h2>Widget com configuração padrão</h2>
+  <div class="widget-container">
+    <div id="alerta-cambio-widget"></div>
+  </div>
+  
+  <h2>Widget com moedas personalizadas</h2>
+  <div class="widget-container">
+    <div id="alerta-cambio-widget-custom"></div>
+  </div>
+  
+  <h2>Widget com tema escuro</h2>
+  <div class="widget-container">
+    <div id="alerta-cambio-widget-dark"></div>
+  </div>
+  
+  <div class="example-code">
+    <h3>Código de incorporação:</h3>
+    <pre><code>
+&lt;!-- Widget de Cotações - Alerta de Câmbio --&gt;
+&lt;div id="alerta-cambio-widget"&gt;&lt;/div&gt;
+&lt;script&gt;
+  (function() {
+    var script = document.createElement('script');
+    script.src = '/widgets/ticker.js';
+    script.async = true;
+    script.onload = function() {
+      AlertaCambioWidget.init({
+        container: 'alerta-cambio-widget',
+        symbols: 'USD/BRL,EUR/BRL',
+        showLogos: true,
+        showVariation: true,
+        lang: 'pt-BR'
+      });
+    };
+    document.head.appendChild(script);
+  })();
+&lt;/script&gt;
+    </code></pre>
+  </div>
+  
+  <script>
+    // Widget padrão
+    (function() {
+      var script = document.createElement('script');
+      script.src = '/widgets/ticker.js';
+      script.async = true;
+      script.onload = function() {
+        AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget',
+          symbols: 'USD/BRL,EUR/BRL',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        });
+      };
+      document.head.appendChild(script);
+    })();
+    
+    // Widget com moedas personalizadas
+    (function() {
+      var script = document.createElement('script');
+      script.src = '/widgets/ticker.js';
+      script.async = true;
+      script.onload = function() {
+        AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget-custom',
+          symbols: 'USD/BRL,EUR/BRL,GBP/BRL,BTC/USD',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        });
+      };
+      document.head.appendChild(script);
+    })();
+    
+    // Widget com tema escuro
+    (function() {
+      var script = document.createElement('script');
+      script.src = '/widgets/ticker.js';
+      script.async = true;
+      script.onload = function() {
+        AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget-dark',
+          symbols: 'USD/BRL,EUR/BRL,BTC/USD,ETH/USD',
+          theme: 'dark',
+          bgColor: '#1F2937',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        });
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+</body>
+</html>

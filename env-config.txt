@@ -1,0 +1,7 @@
+# Firebase
+VITE_FIREBASE_API_KEY="AIzaSyDDQcPWZp7ofDABcuj_-wUXgxoQgpdRMlI"
+VITE_FIREBASE_AUTH_DOMAIN="alerta-de-cambio.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID="alerta-de-cambio"
+VITE_FIREBASE_STORAGE_BUCKET="alerta-de-cambio.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID="486624655085"
+VITE_FIREBASE_APP_ID="1:486624655085:web:ed1f5eaba7f6cb204ffee4"

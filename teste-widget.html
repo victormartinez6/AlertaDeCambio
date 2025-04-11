@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste do Widget de Cotações</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .widget-container {
+      margin-bottom: 40px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teste do Widget de Cotações</h1>
+  
+  <div class="widget-container">
+    <div id="alerta-cambio-widget"></div>
+  </div>
+  
+  <!-- Carrega o script do widget -->
+  <script src="ticker.js"></script>
+  
+  <script>
+    // Inicializa o widget quando a página carregar
+    window.onload = function() {
+      // Verifica se o objeto AlertaCambioWidget existe
+      if (window.AlertaCambioWidget) {
+        console.log('AlertaCambioWidget encontrado, inicializando...');
+        
+        // Inicializa o widget com configurações básicas
+        AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget',
+          symbols: 'USD/BRL,EUR/BRL',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        });
+      } else {
+        console.error('AlertaCambioWidget não encontrado!');
+        document.getElementById('alerta-cambio-widget').innerHTML = 
+          '<div style="color: red; padding: 20px; text-align: center;">Erro: Widget não carregado corretamente.</div>';
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<template>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Modal de Login -->
+    <Transition
+      enter-active-class="transition ease-out duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showLoginModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div 
+          class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20 transform transition-all"
+          @click.stop
+        >
+          <!-- Conteúdo do Login -->
+          <div class="text-center mb-8">
+            <img 
+              src="@/assets/Logo_Cambio_Hoje.svg" 
+              alt="Logo Câmbio Hoje" 
+              class="h-16 w-auto mx-auto mb-4"
+            />
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Área do Agente</h2>
+            <p class="text-gray-600">Acesso restrito a colaboradores</p>
+          </div>
+
+          <!-- Mensagem de Erro -->
+          <div v-if="authStore.error" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-100">
+            <p class="text-sm text-red-600">{{ authStore.error }}</p>
+          </div>
+
+          <!-- Formulário -->
+          <form @submit.prevent="handleLogin" class="space-y-6">
+            <div>
+              <input
+                v-model="loginData.email"
+                type="email"
+                placeholder="Email corporativo"
+                class="w-full px-4 py-3 rounded-lg bg-white/50 border border-gray-200 focus:ring-2 focus:ring-[#654CF0] focus:border-transparent transition-all"
+                required
+              >
+            </div>
+            
+            <div>
+              <input
+                v-model="loginData.password"
+                type="password"
+                placeholder="Senha"
+                class="w-full px-4 py-3 rounded-lg bg-white/50 border border-gray-200 focus:ring-2 focus:ring-[#654CF0] focus:border-transparent transition-all"
+                required
+              >
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-gradient-to-r from-[#654CF0] to-[#8B76FF] text-white rounded-lg px-4 py-3 text-sm font-medium hover:shadow-lg transition-all duration-300"
+              :disabled="authStore.loading"
+            >
+              {{ authStore.loading ? 'Entrando...' : 'Entrar' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Conteúdo principal -->
+    <router-view />
+
+    <!-- Notificações -->
+    <NotificationManager />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import NotificationManager from '@/components/NotificationManager.vue'
+import { LockClosedIcon } from '@heroicons/vue/24/outline'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const showLoginModal = ref(false)
+
+const loginData = ref({
+  email: '',
+  password: ''
+})
+
+const openModal = () => {
+  showLoginModal.value = true
+}
+
+const closeModal = () => {
+  showLoginModal.value = false
+  loginData.value = {
+    email: '',
+    password: ''
+  }
+  authStore.error = null
+}
+
+const handleLogin = async () => {
+  try {
+    await authStore.login(loginData.value.email, loginData.value.password)
+    closeModal()
+    router.push('/agente/dashboard')
+  } catch (error) {
+    // Erro já tratado no store
+  }
+}
+
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    router.push('/')
+  } catch (error) {
+    // Erro já tratado no store
+  }
+}
+</script>

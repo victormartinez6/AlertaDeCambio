@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Simples - Alerta de Câmbio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Widget Simples de Cotações</h1>
+  
+  <div id="alerta-cambio-widget"></div>
+  
+  <script src="/widgets/ticker.js"></script>
+  <script>
+    // Inicializa o widget após o carregamento da página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verifica se o objeto AlertaCambioWidget existe
+      if (window.AlertaCambioWidget) {
+        console.log('AlertaCambioWidget encontrado, inicializando...');
+        
+        // Inicializa o widget com configurações básicas
+        AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget',
+          symbols: 'USD/BRL,EUR/BRL',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        });
+      } else {
+        console.error('AlertaCambioWidget não encontrado!');
+        document.getElementById('alerta-cambio-widget').innerHTML = 
+          '<div style="color: red; padding: 20px; text-align: center;">Erro: Widget não carregado corretamente.</div>';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Completo - Widget de Cotações</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    
+    h1, h2 {
+      text-align: center;
+    }
+    
+    h1 {
+      margin-bottom: 30px;
+      color: #4f46e5;
+    }
+    
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      color: #6366f1;
+    }
+    
+    .widget-container {
+      margin-bottom: 40px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .dark-container {
+      background-color: #1e293b;
+      color: #fff;
+    }
+    
+    .code-block {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 40px;
+      overflow: auto;
+    }
+    
+    pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    button:hover {
+      background-color: #4338ca;
+    }
+  </style>
+</head>
+<body>
+  <h1>Teste Completo do Widget de Cotações</h1>
+  
+  <div class="widget-container">
+    <h2>Widget Padrão</h2>
+    <div id="alerta-cambio-widget"></div>
+    <div id="status-padrao" class="status"></div>
+    <button onclick="recarregarWidget('padrao')">Recarregar Widget</button>
+  </div>
+  
+  <div class="widget-container">
+    <h2>Widget com Moedas Personalizadas</h2>
+    <div id="alerta-cambio-widget-custom"></div>
+    <div id="status-custom" class="status"></div>
+    <button onclick="recarregarWidget('custom')">Recarregar Widget</button>
+  </div>
+  
+  <div class="widget-container dark-container">
+    <h2>Widget com Tema Escuro</h2>
+    <div id="alerta-cambio-widget-dark"></div>
+    <div id="status-dark" class="status"></div>
+    <button onclick="recarregarWidget('dark')">Recarregar Widget</button>
+  </div>
+  
+  <div class="code-block">
+    <h3>Código de Incorporação:</h3>
+    <pre><code>&lt;!-- Widget de Cotações - Alerta de Câmbio --&gt;
+&lt;div id="alerta-cambio-widget"&gt;&lt;/div&gt;
+&lt;script&gt;
+  (function() {
+    var script = document.createElement('script');
+    script.src = '/widgets/ticker.js';
+    script.async = true;
+    script.onload = function() {
+      AlertaCambioWidget.init({
+        container: 'alerta-cambio-widget',
+        symbols: 'USD/BRL,EUR/BRL',
+        showLogos: true,
+        showVariation: true,
+        lang: 'pt-BR'
+      });
+    };
+    document.head.appendChild(script);
+  })();
+&lt;/script&gt;</code></pre>
+  </div>
+  
+  <script>
+    // Função para carregar o widget
+    function carregarWidget(config, statusId) {
+      const statusElement = document.getElementById(statusId);
+      statusElement.textContent = "Carregando widget...";
+      statusElement.className = "status";
+      
+      try {
+        // Cria um novo elemento script
+        const script = document.createElement('script');
+        script.src = '/widgets/ticker.js';
+        script.async = true;
+        
+        // Quando o script carregar, inicializa o widget
+        script.onload = function() {
+          try {
+            if (window.AlertaCambioWidget) {
+              console.log(`Inicializando widget ${config.container}...`);
+              window.AlertaCambioWidget.init(config);
+              
+              statusElement.textContent = "Widget carregado com sucesso!";
+              statusElement.className = "status success";
+            } else {
+              console.error('AlertaCambioWidget não encontrado!');
+              statusElement.textContent = "Erro: AlertaCambioWidget não encontrado!";
+              statusElement.className = "status error";
+            }
+          } catch (error) {
+            console.error(`Erro ao inicializar widget ${config.container}:`, error);
+            statusElement.textContent = `Erro ao inicializar widget: ${error.message}`;
+            statusElement.className = "status error";
+          }
+        };
+        
+        // Se houver erro ao carregar o script
+        script.onerror = function() {
+          console.error(`Erro ao carregar script para ${config.container}`);
+          statusElement.textContent = "Erro ao carregar o script do widget!";
+          statusElement.className = "status error";
+        };
+        
+        // Adiciona o script à página
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error(`Erro ao carregar widget ${config.container}:`, error);
+        statusElement.textContent = `Erro ao carregar widget: ${error.message}`;
+        statusElement.className = "status error";
+      }
+    }
+    
+    // Função para recarregar um widget específico
+    function recarregarWidget(tipo) {
+      // Limpa o container do widget
+      const containerId = tipo === 'padrao' ? 'alerta-cambio-widget' : 
+                          tipo === 'custom' ? 'alerta-cambio-widget-custom' : 
+                          'alerta-cambio-widget-dark';
+      
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = '';
+      }
+      
+      // Configura e carrega o widget
+      if (tipo === 'padrao') {
+        carregarWidget({
+          container: 'alerta-cambio-widget',
+          symbols: 'USD/BRL,EUR/BRL',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        }, 'status-padrao');
+      } else if (tipo === 'custom') {
+        carregarWidget({
+          container: 'alerta-cambio-widget-custom',
+          symbols: 'USD/BRL,EUR/BRL,GBP/BRL,BTC/USD',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        }, 'status-custom');
+      } else if (tipo === 'dark') {
+        carregarWidget({
+          container: 'alerta-cambio-widget-dark',
+          symbols: 'USD/BRL,EUR/BRL,BTC/USD,ETH/USD',
+          theme: 'dark',
+          bgColor: '#1e293b',
+          showLogos: true,
+          showVariation: true,
+          lang: 'pt-BR'
+        }, 'status-dark');
+      }
+    }
+    
+    // Carrega todos os widgets quando a página carregar
+    window.onload = function() {
+      recarregarWidget('padrao');
+      
+      // Pequeno atraso para carregar os outros widgets
+      setTimeout(() => {
+        recarregarWidget('custom');
+        
+        setTimeout(() => {
+          recarregarWidget('dark');
+        }, 500);
+      }, 500);
+    };
+  </script>
+</body>
+</html>
