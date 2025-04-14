@@ -158,6 +158,23 @@
             </label>
           </div>
           
+          <!-- Velocidade do Carrossel -->
+          <div class="mb-4">
+            <label for="velocidade-carrossel" class="block text-sm font-medium mb-2">Velocidade do Carrossel (segundos por ciclo)</label>
+            <div class="flex items-center space-x-4">
+              <input 
+                type="range" 
+                id="velocidade-carrossel" 
+                v-model.number="configWidget.velocidadeCarrossel"
+                min="30" 
+                max="600" 
+                step="30"
+                class="w-48"
+              >
+              <span class="text-sm font-medium">{{ configWidget.velocidadeCarrossel }}s</span>
+            </div>
+          </div>
+          
           <!-- Idioma -->
           <div class="mb-4">
             <label for="idioma" class="block text-sm font-medium mb-2">Idioma</label>
@@ -233,97 +250,13 @@
           :class="{'bg-transparent': configWidget.fundoTransparente}"
           :style="{ backgroundColor: configWidget.fundoTransparente ? 'transparent' : configWidget.corFundo, width: configWidget.largura === 'custom' ? customWidth : configWidget.largura }"
         >
-          <div 
-            ref="previewWidget" 
-            class="ticker-widget p-3" 
-            :class="{ 
-              'dark': configWidget.tema === 'escuro',
-              'light': configWidget.tema === 'claro'
-            }"
-          >
-            <!-- Carrossel infinito -->
-            <div v-if="moedasSelecionadas.length > 0" class="carousel-container">
-              <div class="carousel-track">
-                <!-- Primeiro conjunto de itens -->
-                <div 
-                  v-for="moeda in moedasSelecionadas" 
-                  :key="`original-${moeda.codigo}`" 
-                  class="carousel-item"
-                  :class="{ 'bg-white/10': configWidget.tema === 'escuro', 'bg-gray-100': configWidget.tema === 'claro' }"
-                >
-                  <div class="flex items-center">
-                    <div class="relative mr-4 flex-shrink-0 self-center" v-if="configWidget.mostrarLogos">
-                      <img 
-                        :src="moeda.logo" 
-                        :alt="moeda.codigo.split('/')[0]" 
-                        class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 z-10 relative object-cover"
-                      >
-                      <img 
-                        :src="moeda.logoSecundario" 
-                        :alt="moeda.codigo.split('/')[1]" 
-                        class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 absolute -bottom-3 -right-3 object-cover"
-                      >
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="font-bold text-sm">{{ moeda.codigo }}</span>
-                      <span class="text-xs text-gray-500 dark:text-gray-300">{{ moeda.nome }}</span>
-                    </div>
-                  </div>
-                  <div class="ml-3 flex flex-col items-end">
-                    <span class="font-bold text-xl">{{ Number(moeda.valor).toFixed(4) }}</span>
-                    <span 
-                      v-if="configWidget.mostrarVariacao" 
-                      class="text-sm"
-                      :class="moeda.variacao >= 0 ? 'text-green-500' : 'text-red-500'"
-                    >
-                      {{ moeda.variacao >= 0 ? '+' : '' }}{{ moeda.variacao }}%
-                    </span>
-                  </div>
-                </div>
-                
-                <!-- Segundo conjunto de itens (duplicado para criar efeito infinito) -->
-                <div 
-                  v-for="moeda in moedasSelecionadas" 
-                  :key="`duplicate-${moeda.codigo}`" 
-                  class="carousel-item"
-                  :class="{ 'bg-white/10': configWidget.tema === 'escuro', 'bg-gray-100': configWidget.tema === 'claro' }"
-                >
-                  <div class="flex items-center">
-                    <div class="relative mr-4 flex-shrink-0 self-center" v-if="configWidget.mostrarLogos">
-                      <img 
-                        :src="moeda.logo" 
-                        :alt="moeda.codigo.split('/')[0]" 
-                        class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 z-10 relative object-cover"
-                      >
-                      <img 
-                        :src="moeda.logoSecundario" 
-                        :alt="moeda.codigo.split('/')[1]" 
-                        class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 absolute -bottom-3 -right-3 object-cover"
-                      >
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="font-bold text-sm">{{ moeda.codigo }}</span>
-                      <span class="text-xs text-gray-500 dark:text-gray-300">{{ moeda.nome }}</span>
-                    </div>
-                  </div>
-                  <div class="ml-3 flex flex-col items-end">
-                    <span class="font-bold text-xl">{{ Number(moeda.valor).toFixed(4) }}</span>
-                    <span 
-                      v-if="configWidget.mostrarVariacao" 
-                      class="text-sm"
-                      :class="moeda.variacao >= 0 ? 'text-green-500' : 'text-red-500'"
-                    >
-                      {{ moeda.variacao >= 0 ? '+' : '' }}{{ moeda.variacao }}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div v-else class="p-4 text-center text-gray-500">
-              Selecione pelo menos uma moeda para visualizar a prévia
-            </div>
-          </div>
+          <!-- Usando iframe para renderizar o widget exatamente como será no site final -->
+          <iframe 
+            ref="previewIframe" 
+            style="width: 100%; height: 70px; border: none; overflow: hidden;" 
+            title="Prévia do Widget"
+            scrolling="no"
+          ></iframe>
         </div>
       </div>
       
@@ -379,7 +312,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { 
   ArrowLeftIcon, 
@@ -411,7 +344,7 @@ export default {
     const widgetId = route.params.id
     const isEditing = computed(() => !!widgetId)
     const widgetName = ref('')
-    const previewWidget = ref(null)
+    const previewIframe = ref(null)
     const copiado = ref(false)
     const salvando = ref(false)
     const notificacao = ref({
@@ -448,32 +381,12 @@ export default {
       { 
         codigo: 'GBP/BRL', 
         nome: 'Libra Esterlina', 
-        selecionada: false, 
+        selecionada: true, 
         valor: '6.7823', 
         variacao: 0.12,
         logo: 'https://flagcdn.com/w80/gb.png',
         logoSecundario: 'https://flagcdn.com/w80/br.png',
         ordem: 3
-      },
-      { 
-        codigo: 'BTC/USD', 
-        nome: 'Bitcoin', 
-        selecionada: false, 
-        valor: '63245.7812', 
-        variacao: 2.45,
-        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png',
-        logoSecundario: 'https://flagcdn.com/w80/us.png',
-        ordem: 4
-      },
-      { 
-        codigo: 'ETH/USD', 
-        nome: 'Ethereum', 
-        selecionada: false, 
-        valor: '3456.9231', 
-        variacao: 1.23,
-        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
-        logoSecundario: 'https://flagcdn.com/w80/us.png',
-        ordem: 5
       },
       { 
         codigo: 'JPY/BRL', 
@@ -483,7 +396,7 @@ export default {
         variacao: -0.15,
         logo: 'https://flagcdn.com/w80/jp.png',
         logoSecundario: 'https://flagcdn.com/w80/br.png',
-        ordem: 6
+        ordem: 0
       },
       { 
         codigo: 'CAD/BRL', 
@@ -493,7 +406,117 @@ export default {
         variacao: 0.28,
         logo: 'https://flagcdn.com/w80/ca.png',
         logoSecundario: 'https://flagcdn.com/w80/br.png',
-        ordem: 7
+        ordem: 0
+      },
+      { 
+        codigo: 'AUD/BRL', 
+        nome: 'Dólar Australiano', 
+        selecionada: false, 
+        valor: '3.4521', 
+        variacao: -0.10,
+        logo: 'https://flagcdn.com/w80/au.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'CHF/BRL', 
+        nome: 'Franco Suíço', 
+        selecionada: false, 
+        valor: '5.9876', 
+        variacao: 0.10,
+        logo: 'https://flagcdn.com/w80/ch.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'CNY/BRL', 
+        nome: 'Yuan Chinês', 
+        selecionada: false, 
+        valor: '0.7532', 
+        variacao: 0.05,
+        logo: 'https://flagcdn.com/w80/cn.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'ARS/BRL', 
+        nome: 'Peso Argentino', 
+        selecionada: false, 
+        valor: '0.0123', 
+        variacao: 0.50,
+        logo: 'https://flagcdn.com/w80/ar.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'BTC/USD', 
+        nome: 'Bitcoin', 
+        selecionada: true, 
+        valor: '63245.7812', 
+        variacao: 2.45,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png',
+        logoSecundario: 'https://flagcdn.com/w80/us.png',
+        ordem: 4
+      },
+      { 
+        codigo: 'ETH/USD', 
+        nome: 'Ethereum', 
+        selecionada: true, 
+        valor: '3456.9231', 
+        variacao: 1.23,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
+        logoSecundario: 'https://flagcdn.com/w80/us.png',
+        ordem: 5
+      },
+      { 
+        codigo: 'XRP/USD', 
+        nome: 'Ripple', 
+        selecionada: false, 
+        valor: '0.5043', 
+        variacao: -0.50,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/xrp.png',
+        logoSecundario: 'https://flagcdn.com/w80/us.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'LTC/USD', 
+        nome: 'Litecoin', 
+        selecionada: false, 
+        valor: '80.5432', 
+        variacao: 0.35,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/ltc.png',
+        logoSecundario: 'https://flagcdn.com/w80/us.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'DOGE/USD', 
+        nome: 'Dogecoin', 
+        selecionada: false, 
+        valor: '0.1234', 
+        variacao: 1.20,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/doge.png',
+        logoSecundario: 'https://flagcdn.com/w80/us.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'BTC/BRL', 
+        nome: 'Bitcoin (BRL)', 
+        selecionada: false, 
+        valor: '320456.78', 
+        variacao: 1.50,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
+      },
+      { 
+        codigo: 'ETH/BRL', 
+        nome: 'Ethereum (BRL)', 
+        selecionada: false, 
+        valor: '17654.32', 
+        variacao: 0.95,
+        logo: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
+        logoSecundario: 'https://flagcdn.com/w80/br.png',
+        ordem: 0
       }
     ])
     
@@ -504,62 +527,87 @@ export default {
       mostrarLogos: true,
       mostrarVariacao: true,
       idioma: 'pt-BR',
-      largura: '100%' // Largura padrão do container
+      largura: '100%', // Largura padrão do container
+      velocidadeCarrossel: 40 // Velocidade padrão do carrossel
     })
+    
+    // Variável para largura personalizada
+    const customWidth = ref('400px')
     
     const moedasSelecionadas = computed(() => {
       return moedas.value.filter(moeda => moeda.selecionada).sort((a, b) => a.ordem - b.ordem)
     })
     
+    // Função para obter a URL do script do widget
+    function getScriptUrl() {
+      // Determina a URL base do script (local para desenvolvimento, URL personalizada para produção)
+      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? window.location.origin 
+        : 'https://alerta.cambiohoje.com.br';
+      
+      return `${baseUrl}/widgets/ticker.js`;
+    }
+    
     const embedCode = computed(() => {
       // Gera o código de incorporação com base nas configurações
-      const moedasParam = moedasSelecionadas.value.map(m => m.codigo).join(',')
+      const moedasParam = moedasSelecionadas.value.map(m => m.codigo).join(',');
       
-      // Cria objeto de configuração no formato JSON
-      const configJson = {
+      // Determina a URL base do script (local para desenvolvimento, URL personalizada para produção)
+      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? window.location.origin 
+        : 'https://alerta.cambiohoje.com.br';
+      
+      // Configurações do widget em formato JSON
+      const configJSON = JSON.stringify({
         symbols: moedasParam,
         theme: configWidget.value.tema === 'escuro' ? 'dark' : 'light',
         bgColor: configWidget.value.fundoTransparente ? 'transparent' : configWidget.value.corFundo,
         showLogos: configWidget.value.mostrarLogos,
         showVariation: configWidget.value.mostrarVariacao,
         width: configWidget.value.largura === 'custom' ? customWidth.value : configWidget.value.largura,
-        lang: configWidget.value.idioma
-      }
+        lang: configWidget.value.idioma,
+        carouselSpeed: configWidget.value.velocidadeCarrossel
+      }, null, 6).replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'");
       
-      // Formata o JSON para exibição no código
-      const formattedJson = JSON.stringify(configJson, null, 2)
-        .replace(/"([^"]+)":/g, '$1:') // Remove aspas das chaves
-        .replace(/"/g, "'") // Substitui aspas duplas por aspas simples
-        .replace(/^/gm, '    ') // Adiciona indentação para melhor legibilidade
-      
-      // Usa um truque para evitar conflitos com as tags do Vue
-      const scriptTag = 'script';
-      const scriptCloseTag = '/' + scriptTag;
-      
-      // Determina a URL base do script (local para desenvolvimento, Vercel para produção)
-      const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? window.location.origin 
-        : 'https://alerta-de-cambio.vercel.app';
-      
-      return `<!-- Alerta de Câmbio Widget BEGIN -->
-<div class="alerta-cambio-widget-container" style="max-width: ${configWidget.value.largura === 'custom' ? customWidth.value : configWidget.value.largura}; margin: 0 auto;">
-  <div id="alerta-cambio-widget" style="width: 100%;"></div>
-  <div class="alerta-cambio-widget-copyright" style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;">
-    <a href="${baseUrl}" rel="noopener nofollow" target="_blank" style="color: #6B7280; text-decoration: none;">
-      <span>Powered by Alerta de Câmbio</span>
-    </a>
-  </div>
-  <${scriptTag} type="text/javascript" src="${baseUrl}/widgets/ticker.js" async>
-${formattedJson}
-  </${scriptCloseTag}>
-</div>
-<!-- Alerta de Câmbio Widget END -->`
+      // Código HTML escapado para evitar problemas com o Vue
+      return [
+        '<!DOCTYPE html>',
+        '<html lang="pt-BR">',
+        '',
+        '<head>',
+        '  <meta charset="UTF-8">',
+        '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+        '  <title>Widget Alerta de Câmbio</title>',
+        '</head>',
+        '',
+        '<body>',
+        '  <!-- Alerta de Câmbio Widget BEGIN -->',
+        '  <div class="alerta-cambio-widget-container" style="max-width: 100%; margin: 0 auto;">',
+        '    <div id="alerta-cambio-widget" style="width: 100%;"></div>',
+        '    <div class="alerta-cambio-widget-copyright"',
+        '      style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;">',
+        '      <a href="' + getScriptUrl() + '" rel="noopener nofollow"',
+        '        target="_blank" style="color: #6B7280; text-decoration: none;">',
+        '        <span>Powered by Cambio Hoje</span>',
+        '      </a>',
+        '    </div>',
+        '    <!-- Primeiro carrega o script -->',
+        '    <script type="text/javascript" src="' + getScriptUrl() + '"><\/script>',
+        '    <!-- Depois inicializa com as configurações -->',
+        '    <script type="text/javascript">',
+        '      // Inicializa imediatamente, sem esperar pelo DOMContentLoaded',
+        '      AlertaCambioWidget.init(' + configJSON + ');',
+        '    <\/script>',
+        '  </div>',
+        '  <!-- Alerta de Câmbio Widget END -->',
+        '</body>',
+        '',
+        '</html>'
+      ]
     })
     
-    const customWidth = ref('400px')
-    
     function copiarCodigo() {
-      navigator.clipboard.writeText(embedCode.value)
+      navigator.clipboard.writeText(embedCode.value.join('\n'))
         .then(() => {
           copiado.value = true
           setTimeout(() => {
@@ -740,6 +788,19 @@ ${formattedJson}
       })
     }
     
+    function resetCarouselAnimation() {
+      // Espera o DOM ser atualizado
+      nextTick(() => {
+        const carouselTrack = document.querySelector('.carousel-track');
+        if (carouselTrack) {
+          // Força um reflow para reiniciar a animação
+          carouselTrack.style.animationName = 'none';
+          void carouselTrack.offsetWidth; // Força um reflow
+          carouselTrack.style.animationName = 'carousel';
+        }
+      });
+    }
+    
     function updateCustomWidth() {
       // Validação básica para garantir que o valor seja válido
       const value = customWidth.value.trim()
@@ -753,6 +814,89 @@ ${formattedJson}
       }
     }
     
+    function updatePreviewIframe() {
+      // Obtém os símbolos das moedas selecionadas
+      const selectedSymbols = moedasSelecionadas.value.map(m => m.codigo).join(',');
+      
+      // Gera o conteúdo HTML para o iframe
+      let htmlContent = '<!DOCTYPE html><html><head>';
+      htmlContent += '<meta charset="UTF-8">';
+      htmlContent += '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+      htmlContent += '<title>Prévia do Widget</title>';
+      htmlContent += '<style>';
+      htmlContent += 'body { margin: 0; padding: 0; overflow: hidden; ';
+      htmlContent += 'background: ' + (configWidget.value.fundoTransparente ? 'transparent' : configWidget.value.corFundo) + '; }';
+      htmlContent += '</style>';
+      htmlContent += '</head><body>';
+      htmlContent += '<div id="alerta-cambio-widget"></div>';
+      htmlContent += '<script>';
+      htmlContent += 'window.alertaCambioConfig = {';
+      htmlContent += 'container: "alerta-cambio-widget",';
+      htmlContent += 'symbols: "' + selectedSymbols + '",';
+      htmlContent += 'theme: "' + (configWidget.value.tema === 'escuro' ? 'dark' : 'light') + '",';
+      htmlContent += 'bgColor: "' + (configWidget.value.fundoTransparente ? 'transparent' : configWidget.value.corFundo) + '",';
+      htmlContent += 'showLogos: ' + configWidget.value.mostrarLogos + ',';
+      htmlContent += 'showVariation: ' + configWidget.value.mostrarVariacao + ',';
+      htmlContent += 'lang: "' + configWidget.value.idioma + '",';
+      htmlContent += 'carouselSpeed: ' + configWidget.value.velocidadeCarrossel + ',';
+      htmlContent += 'debug: false';
+      htmlContent += '};';
+      htmlContent += '<\/script>';
+      htmlContent += '<script src="' + getScriptUrl() + '"><\/script>';
+      htmlContent += '<\/body><\/html>';
+      
+      nextTick(() => {
+        try {
+          const iframe = previewIframe.value;
+          if (iframe) {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(htmlContent);
+            iframeDoc.close();
+            
+            // Ajusta a altura do iframe após o carregamento
+            setTimeout(() => {
+              try {
+                if (iframe.contentWindow.document.body) {
+                  const height = iframe.contentWindow.document.body.scrollHeight;
+                  iframe.style.height = (height + 5) + 'px'; // Adiciona um pequeno espaço extra
+                }
+              } catch (e) {
+                console.error('Erro ao ajustar altura do iframe:', e);
+              }
+            }, 300);
+          }
+        } catch (error) {
+          console.error('Erro ao atualizar prévia do iframe:', error);
+        }
+      });
+    }
+    
+    let watcherTimeout = null;
+    let updateInterval = null;
+    
+    // Observa mudanças nas moedas selecionadas
+    watch(moedasSelecionadas, () => {
+      if (watcherTimeout) {
+        clearTimeout(watcherTimeout);
+      }
+      
+      watcherTimeout = setTimeout(() => {
+        updatePreviewIframe();
+      }, 100);
+    }, { deep: true })
+    
+    // Observa mudanças nas configurações do widget
+    watch(configWidget, (newVal, oldVal) => {
+      if (watcherTimeout) {
+        clearTimeout(watcherTimeout);
+      }
+      
+      watcherTimeout = setTimeout(() => {
+        updatePreviewIframe();
+      }, 100);
+    }, { deep: true })
+    
     onMounted(() => {
       carregarWidget()
       
@@ -761,32 +905,33 @@ ${formattedJson}
         buscarCotacoes()
       }, 500)
       
-      // Usa um debounce para o watcher de moedasSelecionadas
-      let watcherTimeout = null;
+      // Inicializa a prévia do iframe
+      updatePreviewIframe();
       
-      // Observa mudanças nas moedas selecionadas
-      watch(moedasSelecionadas, () => {
-        if (watcherTimeout) {
-          clearTimeout(watcherTimeout);
+      // Configura a atualização periódica a cada 10 segundos
+      updateInterval = setInterval(() => {
+        // Apenas atualiza o iframe, sem recriar todo o conteúdo
+        const iframe = previewIframe.value;
+        if (iframe && iframe.contentWindow) {
+          try {
+            // Envia uma mensagem para o iframe atualizar as cotações
+            // Inclui os símbolos selecionados na mensagem
+            const selectedSymbols = moedasSelecionadas.value.map(m => m.codigo).join(',');
+            iframe.contentWindow.postMessage({
+              action: 'updateQuotes',
+              symbols: selectedSymbols
+            }, '*');
+          } catch (e) {
+            console.error('Erro ao enviar mensagem para o iframe:', e);
+          }
         }
-        
-        watcherTimeout = setTimeout(() => {
-          // Não precisamos mais chamar iniciarTicker()
-          // A renderização é feita automaticamente pelo Vue
-        }, 500);
-      }, { deep: true })
-      
-      // Observa mudanças nas configurações do widget
-      watch(configWidget, () => {
-        if (watcherTimeout) {
-          clearTimeout(watcherTimeout);
-        }
-        
-        watcherTimeout = setTimeout(() => {
-          // Não precisamos mais chamar iniciarTicker()
-          // A renderização é feita automaticamente pelo Vue
-        }, 500);
-      }, { deep: true })
+      }, 10000); // 10 segundos
+    })
+    
+    onUnmounted(() => {
+      if (updateInterval) {
+        clearInterval(updateInterval);
+      }
     })
     
     return {
@@ -797,7 +942,7 @@ ${formattedJson}
       moedasSelecionadas,
       embedCode,
       copiado,
-      previewWidget,
+      previewIframe,
       copiarCodigo,
       salvarWidget,
       cancelar,
@@ -808,7 +953,8 @@ ${formattedJson}
       atualizarOrdensMoedas,
       handleMoedaSelecao,
       customWidth,
-      updateCustomWidth
+      updateCustomWidth,
+      updatePreviewIframe
     }
   }
 }
@@ -819,6 +965,8 @@ ${formattedJson}
   overflow: hidden;
   width: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .ticker-widget.dark {
@@ -831,26 +979,31 @@ ${formattedJson}
 
 /* Estilos do carrossel */
 .carousel-container {
-  overflow: hidden;
   position: relative;
-  height: 90px;
+  overflow: hidden;
+  height: 64px;
   display: flex;
   align-items: center;
 }
 
 .carousel-track {
-  display: flex;
+  display: inline-flex;
   position: absolute;
-  animation: carousel 40s linear infinite;
+  white-space: nowrap;
   will-change: transform;
+  animation-name: carousel;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  gap: 8px;
+  align-items: center;
 }
 
 @keyframes carousel {
   0% {
-    transform: translateX(0);
+    transform: translateX(100%);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
 
@@ -858,26 +1011,21 @@ ${formattedJson}
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 8px 12px;
+  margin-right: 8px;
+  border-radius: 8px;
+  min-width: 200px;
+  width: auto;
+  height: 48px;
   transition: all 0.2s ease;
-  padding: 0.75rem 1rem;
-  margin-right: 1rem;
-  border-radius: 0.5rem;
-  min-width: 280px;
-  width: 280px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
-.carousel-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.dark .carousel-item {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.ticker-widget.dark .carousel-item {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.ticker-widget.light .carousel-item {
-  border-color: rgba(0, 0, 0, 0.05);
+.light .carousel-item {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 </style>

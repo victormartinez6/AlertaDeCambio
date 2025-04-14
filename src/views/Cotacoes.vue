@@ -1,7 +1,21 @@
 <template>
   <div class="space-y-8">
+    <!-- Widget de Cotações -->
+    <div class="pt-2 mb-2">
+      <CotacoesWidget 
+        symbols="USD/BRL,EUR/BRL,GBP/BRL,CAD/BRL,JPY/BRL,AUD/BRL,CHF/BRL,CNY/BRL,ARS/BRL,ETH/USD,BTC/USD,BTC/BRL"
+        theme="light"
+        bgColor="#FFFFFF"
+        :showLogos="true"
+        :showVariation="true"
+        width="100%"
+        lang="pt-BR"
+        :carouselSpeed="300"
+      />
+    </div>
+
     <!-- Cabeçalho -->
-    <div class="sm:flex sm:items-center pt-4">
+    <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
         <h1 class="text-2xl font-bold text-marinho">Cotações</h1>
         <p class="mt-2 text-sm text-marinho/70">
@@ -280,6 +294,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue'
 import CotacaoChart from '@/components/CotacaoChart.vue'
 import CurrencyChart from '@/components/CurrencyChart.vue'
 import type { CurrencyCode } from '@/types'
+import CotacoesWidget from '@/components/CotacoesWidget.vue'
 
 const store = useCambioStore()
 const { loading, loadingTurismo, loadingComercial, error, cotacoesTurismo, cotacoes, historicoCotacoes, segundosParaAtualizarComercial } = storeToRefs(store)
