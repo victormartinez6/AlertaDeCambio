@@ -10,7 +10,7 @@
         :showVariation="true"
         width="100%"
         lang="pt-BR"
-        :carouselSpeed="300"
+        :carouselSpeed="90"
       />
     </div>
 

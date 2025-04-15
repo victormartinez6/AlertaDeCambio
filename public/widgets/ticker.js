@@ -325,13 +325,13 @@
         padding: 0;
       }
       
-      /* Animação do carrossel */
+      /* Animação do carrossel ajustada para duplicação 2x */
       @keyframes ac-ticker-scroll {
         0% {
-          transform: translateX(100%);
+          transform: translateX(0%);
         }
         100% {
-          transform: translateX(-100%);
+          transform: translateX(-50%);
         }
       }
     `;
@@ -353,245 +353,12 @@
     document.head.appendChild(styleElement);
   }
   
-  // Renderiza um ticker simples com dados fixos
-  function renderSimpleTicker(container, config) {
-    // Limpa o conteúdo atual do container
-    container.innerHTML = '';
-    
-    // Cria o container do ticker
-    const tickerContainer = document.createElement('div');
-    tickerContainer.className = 'ticker-container';
-    
-    // Cria o conteúdo do ticker
-    const tickerContent = document.createElement('div');
-    tickerContent.className = 'ticker-content';
-    
-    // Dados fixos para exibição imediata
-    const fixedData = [
-      { symbol: 'USD/BRL', name: 'Dólar Americano', value: '5.1523', variation: '+0.25%', baseFlag: 'us', quoteFlag: 'br' },
-      { symbol: 'EUR/BRL', name: 'Euro', value: '5.6789', variation: '-0.15%', baseFlag: 'eu', quoteFlag: 'br' },
-      { symbol: 'GBP/BRL', name: 'Libra Esterlina', value: '6.7823', variation: '+0.10%', baseFlag: 'gb', quoteFlag: 'br' },
-      { symbol: 'JPY/BRL', name: 'Iene Japonês', value: '0.034567', variation: '-0.20%', baseFlag: 'jp', quoteFlag: 'br' },
-      { symbol: 'CAD/BRL', name: 'Dólar Canadense', value: '3.8547', variation: '+0.30%', baseFlag: 'ca', quoteFlag: 'br' },
-      { symbol: 'BTC/USD', name: 'Bitcoin', value: '65,432.78', variation: '+1.20%', baseFlag: 'btc', quoteFlag: 'us' },
-      { symbol: 'ETH/USD', name: 'Ethereum', value: '3,456.92', variation: '+0.80%', baseFlag: 'eth', quoteFlag: 'us' }
-    ];
-    
-    // Cria os itens do ticker
-    fixedData.forEach(item => {
-      const tickerItem = document.createElement('div');
-      tickerItem.className = `ticker-item ${config.theme === 'dark' ? 'dark' : 'light'}`;
-      tickerItem.setAttribute('data-symbol', item.symbol);
-      
-      // Parte esquerda (logo, símbolo e nome)
-      const leftPart = document.createElement('div');
-      leftPart.className = 'ticker-left';
-      
-      // Adiciona logos se configurado
-      if (config.showLogos) {
-        const logoContainer = document.createElement('div');
-        logoContainer.className = 'ticker-logo';
-        
-        // Logo principal
-        const baseImg = document.createElement('img');
-        baseImg.src = getLogoUrl(item.baseFlag);
-        baseImg.alt = item.symbol.split('/')[0];
-        logoContainer.appendChild(baseImg);
-        
-        // Logo secundário
-        const quoteImg = document.createElement('img');
-        quoteImg.className = 'secondary';
-        quoteImg.src = getLogoUrl(item.quoteFlag);
-        quoteImg.alt = item.symbol.split('/')[1];
-        logoContainer.appendChild(quoteImg);
-        
-        leftPart.appendChild(logoContainer);
-      }
-      
-      // Informações da moeda
-      const infoContainer = document.createElement('div');
-      infoContainer.className = 'ticker-info';
-      
-      const symbolElement = document.createElement('div');
-      symbolElement.className = 'ticker-symbol';
-      symbolElement.textContent = item.symbol;
-      infoContainer.appendChild(symbolElement);
-      
-      const nameElement = document.createElement('div');
-      nameElement.className = 'ticker-name';
-      nameElement.textContent = item.name;
-      infoContainer.appendChild(nameElement);
-      
-      leftPart.appendChild(infoContainer);
-      tickerItem.appendChild(leftPart);
-      
-      // Parte direita (valor e variação)
-      const rightPart = document.createElement('div');
-      rightPart.className = 'ticker-right';
-      
-      const valueElement = document.createElement('div');
-      valueElement.className = 'ticker-value';
-      valueElement.textContent = item.value;
-      rightPart.appendChild(valueElement);
-      
-      // Adiciona variação se configurado
-      if (config.showVariation) {
-        const variationElement = document.createElement('div');
-        const isPositive = item.variation.startsWith('+');
-        variationElement.className = `ticker-variation ${isPositive ? 'positive' : 'negative'}`;
-        variationElement.textContent = item.variation;
-        rightPart.appendChild(variationElement);
-      }
-      
-      tickerItem.appendChild(rightPart);
-      tickerContent.appendChild(tickerItem);
-    });
-    
-    // Duplica os itens para criar efeito infinito
-    tickerContent.innerHTML += tickerContent.innerHTML;
-    
-    // Monta a estrutura
-    tickerContainer.appendChild(tickerContent);
-    container.appendChild(tickerContainer);
-    
-    if (config.debug) console.log('Ticker simples renderizado com sucesso');
-  }
-  
-  // Função auxiliar para obter URL do logo
-  function getLogoUrl(code) {
-    const cryptoLogos = {
-      'btc': 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/btc.png',
-      'eth': 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png'
-    };
-    
-    if (cryptoLogos[code]) {
-      return cryptoLogos[code];
-    }
-    
-    return `https://flagcdn.com/w80/${code}.png`;
-  }
-  
-  // Função para buscar cotações (mantida para compatibilidade)
-  function fetchQuotes(symbols, config, container) {
+  // Função para renderizar o ticker (placeholder ou real)
+  function renderTicker(symbols, config, container, quotesMap = null) {
     try {
-      if (config.debug) console.log('Buscando cotações...');
-      
-      // Renderiza imediatamente com dados de exemplo
-      renderPlaceholderTicker(symbols, config, container);
-      
-      // Atualiza com dados reais em segundo plano
-      setTimeout(() => {
-        updateTickerValues(symbols, config, container);
-      }, 100);
-      
-      // Configura atualização periódica
-      setInterval(() => {
-        updateTickerValues(symbols, config, container);
-      }, config.refreshInterval || 10000);
-      
-    } catch (error) {
-      console.error('Erro ao buscar cotações:', error);
-    }
-  }
-  
-  // Função para atualizar os valores do ticker
-  function updateTickerValues(symbols, config, container) {
-    try {
-      if (config.debug) console.log('Atualizando valores do ticker...', symbols);
-      
-      // Garantir que symbols seja um array
-      if (typeof symbols === 'string') {
-        symbols = symbols.split(',').map(s => s.trim());
-      }
-      
-      // Verificação adicional para garantir que symbols seja um array
-      if (!Array.isArray(symbols)) {
-        console.error('Erro: symbols deve ser um array ou uma string separada por vírgulas', symbols);
-        // Tenta converter para array de qualquer forma
-        try {
-          if (symbols && typeof symbols === 'object') {
-            symbols = Object.keys(symbols);
-          } else {
-            // Se não conseguir converter, usa um array vazio
-            symbols = defaultConfig.symbols.split(',').map(s => s.trim());
-          }
-        } catch (e) {
-          console.error('Não foi possível converter symbols para array:', e);
-          symbols = defaultConfig.symbols.split(',').map(s => s.trim());
-        }
-      }
-      
-      // Se não tiver símbolos, não faz nada
-      if (symbols.length === 0) {
-        console.warn('Nenhum símbolo para atualizar');
-        return;
-      }
-      
-      if (config.debug) console.log('Símbolos para atualizar:', symbols);
-      
-      // Monta a URL da API com os símbolos mapeados
-      const apiSymbols = symbols.map(symbol => symbolMapping[symbol] || symbol).join(',');
-      const apiUrl = `https://economia.awesomeapi.com.br/json/last/${apiSymbols}`;
-      
-      if (config.debug) console.log('URL da API:', apiUrl);
-      
-      // Faz a requisição para a API
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (config.debug) console.log('Dados recebidos da API:', data);
-          
-          // Atualiza os valores no DOM
-          symbols.forEach(symbol => {
-            try {
-              // Obtém o código da API para o símbolo
-              const apiCode = symbolMapping[symbol] || symbol;
-              const apiCodeFormatted = apiCode.replace('-', '');
-              
-              // Verifica se os dados existem
-              if (data[apiCodeFormatted]) {
-                const quote = data[apiCodeFormatted];
-                
-                // Encontra o elemento do ticker para este símbolo
-                const tickerItem = container.querySelector(`.ac-ticker-item[data-symbol="${symbol}"]`);
-                if (tickerItem) {
-                  // Atualiza o valor
-                  const valueElement = tickerItem.querySelector('.ac-ticker-value');
-                  if (valueElement) {
-                    const value = parseFloat(quote.bid);
-                    valueElement.textContent = formatCurrencyValue(value, symbol);
-                  }
-                  
-                  // Atualiza a variação, se existir
-                  const variationElement = tickerItem.querySelector('.ac-ticker-variation');
-                  if (variationElement && config.showVariation) {
-                    const variation = parseFloat(quote.pctChange);
-                    variationElement.textContent = variation >= 0 ? `+${variation.toFixed(2)}%` : `${variation.toFixed(2)}%`;
-                    variationElement.style.color = variation >= 0 ? '#10B981' : '#EF4444';
-                  }
-                }
-              }
-            } catch (err) {
-              console.error(`Erro ao atualizar ${symbol}:`, err);
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Erro ao buscar cotações:', error);
-        });
-    } catch (e) {
-      console.error('Erro ao atualizar valores:', e);
-    }
-  }
-  
-  // Renderiza o ticker com dados de exemplo para exibição imediata
-  function renderPlaceholderTicker(symbols, config, container) {
-    try {
-      if (config.debug) console.log('Renderizando ticker com dados de exemplo...', symbols);
-      
-      // Limpa o container
+      if (config.debug) console.log('Renderizando ticker...', symbols, quotesMap);
       container.innerHTML = '';
-      
+
       // Cria o container do ticker
       const tickerContainer = document.createElement('div');
       tickerContainer.className = 'ac-ticker-container';
@@ -599,70 +366,17 @@
       tickerContainer.style.width = '100%';
       tickerContainer.style.position = 'relative';
       tickerContainer.style.height = '64px';
-      
+
       // Cria o conteúdo do ticker
       const tickerContent = document.createElement('div');
       tickerContent.className = 'ac-ticker-content';
-      tickerContent.style.display = 'inline-flex';
-      tickerContent.style.position = 'absolute';
-      tickerContent.style.whiteSpace = 'nowrap';
-      tickerContent.style.willChange = 'transform';
-      tickerContent.style.animationName = 'ac-ticker-scroll';
-      tickerContent.style.animationTimingFunction = 'linear';
-      tickerContent.style.animationIterationCount = 'infinite';
-      tickerContent.style.animationDuration = `${config.carouselSpeed}s`;
-      tickerContent.style.gap = '8px';
+      tickerContent.style.display = 'flex';
       tickerContent.style.alignItems = 'center';
-      
-      // Garantir que symbols seja um array
-      if (typeof symbols === 'string') {
-        symbols = symbols.split(',').map(s => s.trim());
-      }
-      
-      // Verificação adicional para garantir que symbols seja um array
-      if (!Array.isArray(symbols)) {
-        console.error('Erro: symbols deve ser um array ou uma string separada por vírgulas', symbols);
-        // Tenta converter para array de qualquer forma
-        try {
-          if (symbols && typeof symbols === 'object') {
-            symbols = Object.keys(symbols);
-          } else {
-            // Se não conseguir converter, usa um array vazio
-            symbols = defaultConfig.symbols.split(',').map(s => s.trim());
-          }
-        } catch (e) {
-          console.error('Não foi possível converter symbols para array:', e);
-          symbols = defaultConfig.symbols.split(',').map(s => s.trim());
-        }
-      }
-      
-      if (config.debug) console.log('Símbolos para renderizar placeholders:', symbols);
-      
-      // Dados de exemplo para cada símbolo
-      const exampleData = {
-        'USD/BRL': { value: 5.25, variation: 0.75 },
-        'EUR/BRL': { value: 5.65, variation: -0.32 },
-        'GBP/BRL': { value: 6.78, variation: 0.12 },
-        'JPY/BRL': { value: 0.035, variation: -0.15 },
-        'CAD/BRL': { value: 3.85, variation: 0.28 },
-        'AUD/BRL': { value: 3.45, variation: -0.10 },
-        'CNY/BRL': { value: 0.75, variation: 0.05 },
-        'ARS/BRL': { value: 0.012, variation: 0.50 },
-        'CHF/BRL': { value: 5.20, variation: 0.10 },
-        'BTC/USD': { value: 65000, variation: 1.20 },
-        'ETH/USD': { value: 3400, variation: 0.80 },
-        'XRP/USD': { value: 0.50, variation: -0.50 },
-        'LTC/USD': { value: 80.50, variation: 0.35 },
-        'BTC/BRL': { value: 320000, variation: 1.50 },
-        'ETH/BRL': { value: 17500, variation: 0.95 }
-      };
-      
-      // Cria um item para cada símbolo
-      symbols.forEach(symbol => {
-        const trimmedSymbol = symbol.trim();
-        const defaultValue = exampleData[trimmedSymbol] || { value: 1.0000, variation: 0.00 };
-        
-        // Cria o item do ticker
+      tickerContent.style.animation = `ac-ticker-scroll linear infinite`;
+      tickerContent.style.animationDuration = `${config.carouselSpeed || 120}s`;
+      tickerContent.style.width = 'max-content';
+
+      symbols.forEach((trimmedSymbol) => {
         const tickerItem = document.createElement('div');
         tickerItem.className = 'ac-ticker-item';
         tickerItem.setAttribute('data-symbol', trimmedSymbol);
@@ -672,14 +386,12 @@
         tickerItem.style.padding = '8px 12px';
         tickerItem.style.marginRight = '8px';
         tickerItem.style.borderRadius = '8px';
-        tickerItem.style.minWidth = '220px'; // Aumentado para garantir espaço suficiente
+        tickerItem.style.minWidth = '280px'; 
         tickerItem.style.width = 'auto';
         tickerItem.style.height = '48px';
         tickerItem.style.transition = 'all 0.2s ease';
         tickerItem.style.boxSizing = 'border-box';
         tickerItem.style.flexShrink = '0';
-        
-        // Aplica o tema
         if (config.theme === 'dark') {
           tickerItem.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
           tickerItem.style.color = '#FFFFFF';
@@ -687,15 +399,13 @@
           tickerItem.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
           tickerItem.style.color = '#333333';
         }
-        
         // Parte esquerda (símbolo e nome)
         const leftPart = document.createElement('div');
         leftPart.className = 'ac-ticker-left';
         leftPart.style.display = 'flex';
         leftPart.style.alignItems = 'center';
-        leftPart.style.width = '60%'; // Define uma largura fixa para a parte esquerda
-        leftPart.style.maxWidth = '150px'; // Limita a largura máxima
-        
+        leftPart.style.width = '60%';
+        leftPart.style.maxWidth = '170px';
         // Logos
         if (config.showLogos) {
           const logoContainer = document.createElement('div');
@@ -704,7 +414,6 @@
           logoContainer.style.marginRight = '8px';
           logoContainer.style.width = '24px';
           logoContainer.style.height = '24px';
-          
           // Logo principal
           const baseCurrency = trimmedSymbol.split('/')[0];
           const baseLogoUrl = getCurrencyLogoUrl(baseCurrency);
@@ -723,7 +432,6 @@
             baseLogo.style.zIndex = '2';
             logoContainer.appendChild(baseLogo);
           }
-          
           // Logo secundário
           const quoteCurrency = trimmedSymbol.split('/')[1];
           const quoteLogoUrl = getCurrencyLogoUrl(quoteCurrency);
@@ -743,77 +451,162 @@
             quoteLogo.style.zIndex = '1';
             logoContainer.appendChild(quoteLogo);
           }
-          
           leftPart.appendChild(logoContainer);
         }
-        
         // Símbolo e nome
         const symbolElement = document.createElement('div');
         symbolElement.className = 'ac-ticker-symbol';
-        
-        // Nome da moeda
         const currencyName = getCurrencyName(trimmedSymbol);
-        symbolElement.innerHTML = `<div style="font-weight: bold; font-size: 16px;">${trimmedSymbol}</div><div style="font-size: 12px; opacity: 0.7;">${currencyName}</div>`;
-        
+        symbolElement.innerHTML = `<div style="font-weight: bold; font-size: 16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${trimmedSymbol}</div><div style="font-size: 12px; opacity: 0.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${currencyName}</div>`;
         leftPart.appendChild(symbolElement);
         tickerItem.appendChild(leftPart);
-        
         // Parte direita (valor e variação)
         const rightPart = document.createElement('div');
         rightPart.className = 'ac-ticker-right';
         rightPart.style.display = 'flex';
         rightPart.style.flexDirection = 'column';
         rightPart.style.alignItems = 'flex-end';
-        rightPart.style.width = '40%'; // Define uma largura fixa para a parte direita
-        rightPart.style.minWidth = '80px'; // Garante um espaço mínimo para os valores
-        
+        rightPart.style.width = '40%';
+        rightPart.style.minWidth = '80px';
         // Valor
         const valueElement = document.createElement('div');
         valueElement.className = 'ac-ticker-value';
-        const value = defaultValue.value;
-        
-        // Formata o valor com base no símbolo
+        let value, variation;
+        if (quotesMap && quotesMap[trimmedSymbol]) {
+          value = quotesMap[trimmedSymbol].value;
+          variation = quotesMap[trimmedSymbol].variation;
+        } else {
+          value = 0;
+          variation = 0;
+        }
         valueElement.textContent = formatCurrencyValue(value, trimmedSymbol);
         valueElement.style.fontWeight = 'bold';
         valueElement.style.fontSize = '16px';
         rightPart.appendChild(valueElement);
-        
         // Variação percentual
         if (config.showVariation) {
           const variationElement = document.createElement('div');
           variationElement.className = 'ac-ticker-variation';
-          
-          // Variação com sinal aleatório
-          const variation = defaultValue.variation + (Math.random() * 0.2 - 0.1);
-          
-          // Formata a variação
-          variationElement.textContent = variation >= 0 ? `+${variation.toFixed(2)}%` : `${variation.toFixed(2)}%`;
+          let showVariation = variation;
+          if (!quotesMap) {
+            showVariation = variation + (Math.random() * 0.2 - 0.1);
+          }
+          variationElement.textContent = showVariation >= 0 ? `+${showVariation.toFixed(2)}%` : `${showVariation.toFixed(2)}%`;
           variationElement.style.fontSize = '12px';
-          variationElement.style.color = variation >= 0 ? '#10B981' : '#EF4444';
-          
+          variationElement.style.color = showVariation >= 0 ? '#10B981' : '#EF4444';
           rightPart.appendChild(variationElement);
         }
-        
         tickerItem.appendChild(rightPart);
         tickerContent.appendChild(tickerItem);
       });
-      
-      // Duplica os itens várias vezes para garantir que o carrossel seja realmente infinito
-      // Quanto mais duplicações, mais tempo o carrossel rodará sem mostrar o "fim"
+      // Duplica os itens apenas uma vez para garantir o carrossel infinito
       let clonedItems = tickerContent.innerHTML;
-      // Duplica os itens 5 vezes para garantir que o carrossel seja realmente infinito
-      tickerContent.innerHTML = clonedItems + clonedItems + clonedItems + clonedItems + clonedItems;
-      
+      tickerContent.innerHTML = clonedItems + clonedItems;
       // Monta a estrutura
       tickerContainer.appendChild(tickerContent);
       container.appendChild(tickerContainer);
-      
-      if (config.debug) console.log('Ticker com dados de exemplo renderizado com sucesso');
+      if (config.debug) console.log('Ticker renderizado com sucesso');
     } catch (e) {
       console.error('Erro ao renderizar ticker:', e);
     }
   }
 
+  // Função para renderizar o ticker de exemplo (placeholder)
+  function renderPlaceholderTicker(symbols, config, container) {
+    renderTicker(symbols, config, container, null);
+  }
+
+  // Função para buscar cotações (mantida para compatibilidade)
+  function fetchQuotes(symbols, config, container) {
+    try {
+      if (config.debug) console.log('Buscando cotações...');
+      // Renderiza imediatamente com dados de exemplo
+      renderPlaceholderTicker(symbols, config, container);
+      // Atualiza com dados reais em segundo plano
+      setTimeout(() => {
+        updateTickerValues(symbols, config, container);
+      }, 100);
+      // Configura atualização periódica
+      setInterval(() => {
+        updateTickerValues(symbols, config, container);
+      }, config.refreshInterval || 10000);
+    } catch (error) {
+      console.error('Erro ao buscar cotações:', error);
+    }
+  }
+
+  // Atualiza apenas os valores e variações no DOM do ticker, sem reiniciar a animação
+  function updateTickerDOMValues(quotesMap, container, config) {
+    try {
+      // Atualiza todos os itens do carrossel (incluindo duplicados)
+      const tickerItems = container.querySelectorAll('.ac-ticker-item');
+      tickerItems.forEach(item => {
+        const symbol = item.getAttribute('data-symbol');
+        const quote = quotesMap[symbol];
+        if (quote) {
+          // Atualiza valor
+          const valueElement = item.querySelector('.ac-ticker-value');
+          if (valueElement) {
+            valueElement.textContent = formatCurrencyValue(quote.value, symbol);
+          }
+          // Atualiza variação
+          const variationElement = item.querySelector('.ac-ticker-variation');
+          if (variationElement && config.showVariation) {
+            variationElement.textContent = quote.variation >= 0 ? `+${quote.variation.toFixed(2)}%` : `${quote.variation.toFixed(2)}%`;
+            variationElement.style.color = quote.variation >= 0 ? '#10B981' : '#EF4444';
+          }
+        }
+      });
+    } catch (e) {
+      console.error('Erro ao atualizar DOM do ticker:', e);
+    }
+  }
+
+  // Função para atualizar os valores do ticker
+  function updateTickerValues(symbols, config, container) {
+    try {
+      if (config.debug) console.log('Atualizando valores do ticker...', symbols);
+      // Garantir que symbols seja um array
+      if (typeof symbols === 'string') {
+        symbols = symbols.split(',').map(s => s.trim());
+      }
+      // Verificação adicional para garantir que symbols seja um array
+      if (!Array.isArray(symbols)) {
+        console.error('Erro: symbols deve ser um array ou uma string separada por vírgulas', symbols);
+        // Tenta converter para array de qualquer forma
+        try {
+          if (symbols && typeof symbols === 'object') {
+            symbols = Object.keys(symbols);
+          } else {
+            // Se não conseguir converter, usa um array vazio
+            symbols = defaultConfig.symbols.split(',').map(s => s.trim());
+          }
+        } catch (e) {
+          console.error('Não foi possível converter symbols para array:', e);
+          symbols = defaultConfig.symbols.split(',').map(s => s.trim());
+        }
+      }
+      // Se não tiver símbolos, não faz nada
+      if (symbols.length === 0) {
+        return;
+      }
+      // Busca as cotações reais
+      fetchQuotesFromAPI(symbols, config).then(quotes => {
+        // Monta um map para acesso rápido
+        const quotesMap = {};
+        quotes.forEach(q => {
+          quotesMap[q.symbol] = q;
+        });
+        // Atualiza apenas os valores no DOM, sem reiniciar o carrossel
+        updateTickerDOMValues(quotesMap, container, config);
+      }).catch(error => {
+        if (config.debug) console.error('Erro ao buscar cotações reais:', error);
+      });
+    } catch (e) {
+      console.error('Erro ao atualizar valores:', e);
+    }
+  }
+  
   // Função auxiliar para obter o nome da moeda
   function getCurrencyName(symbol) {
     const names = {
@@ -894,6 +687,41 @@
     return value.toLocaleString('en-US', { 
       minimumFractionDigits: 4, 
       maximumFractionDigits: 4 
+    });
+  }
+
+  // Função para buscar as cotações reais da API AwesomeAPI
+  function fetchQuotesFromAPI(symbols, config) {
+    return new Promise((resolve, reject) => {
+      try {
+        // Monta a URL da API com os símbolos mapeados
+        const apiSymbols = symbols.map(symbol => symbolMapping[symbol] || symbol).join(',');
+        const apiUrl = `https://economia.awesomeapi.com.br/json/last/${apiSymbols}`;
+        if (config.debug) console.log('URL da API:', apiUrl);
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            if (config.debug) console.log('Dados recebidos da API:', data);
+            // Transforma os dados em um array de objetos padronizados
+            const quotes = symbols.map(symbol => {
+              const apiCode = symbolMapping[symbol] || symbol;
+              const apiCodeFormatted = apiCode.replace('-', '');
+              const d = data[apiCodeFormatted];
+              if (!d) return { symbol, value: 0, variation: 0 };
+              let value = parseFloat(d.ask); 
+              let variation = parseFloat(d.pctChange);
+              return { symbol, value, variation };
+            });
+            resolve(quotes);
+          })
+          .catch(error => {
+            if (config.debug) console.error('Erro ao buscar cotações:', error);
+            reject(error);
+          });
+      } catch (e) {
+        if (config.debug) console.error('Erro ao montar fetchQuotesFromAPI:', e);
+        reject(e);
+      }
     });
   }
 })();
