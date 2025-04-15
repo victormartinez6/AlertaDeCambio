@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Alerta de Câmbio</title>
+</head>
+
+<body>
+  <!-- Alerta de Câmbio Widget BEGIN -->
+  <div class="alerta-cambio-widget-container" style="max-width: 100%; margin: 0 auto;">
+    <div id="alerta-cambio-widget" style="width: 100%;"></div>
+    <div class="alerta-cambio-widget-copyright"
+      style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;">
+      <a href="https://alerta.cambiohoje.com.br" rel="noopener nofollow"
+        target="_blank" style="color: #6B7280; text-decoration: none;">
+        <span>Powered by Cambio Hoje</span>
+      </a>
+    </div>
+    <!-- Primeiro carrega o script -->
+    <script type="text/javascript" src="widgets/ticker.js"></script>
+    <!-- Depois inicializa com as configurações -->
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        AlertaCambioWidget.init({
+          symbols: "USD/BRL,EUR/BRL,GBP/BRL,CAD/BRL,JPY/BRL,ETH/USD,BTC/USD",
+          theme: "light",
+          bgColor: "#FFFFFF",
+          showLogos: true,
+          showVariation: true,
+          width: "100%",
+          lang: "pt-BR"
+        });
+      });
+    </script>
+  </div>
+  <!-- Alerta de Câmbio Widget END -->
+</body>
+
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentação do Widget - Alerta de Câmbio</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1, h2, h3 {
+      color: #654cf0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .section {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .code-block {
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+      border-left: 4px solid #654cf0;
+      font-family: monospace;
+      white-space: pre;
+      margin: 15px 0;
+    }
+
+    .options-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .options-table th, .options-table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .options-table th {
+      background-color: #f2f2f2;
+    }
+
+    .options-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .preview {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #654cf0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #5540d2;
+    }
+
+    .theme-selector {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .theme-option {
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .theme-light {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+
+    .theme-dark {
+      background-color: #333;
+      border: 1px solid #555;
+      color: #fff;
+    }
+
+    .active {
+      border: 2px solid #654cf0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="section">
+      <h1>Widget de Cotações - Alerta de Câmbio</h1>
+      <p>Bem-vindo à documentação do Widget de Cotações do Alerta de Câmbio. Este widget permite que você exiba cotações em tempo real de moedas e criptomoedas em seu site ou blog.</p>
+    </div>
+
+    <div class="section">
+      <h2>Demonstração</h2>
+      <p>Veja abaixo como o widget aparece em seu site:</p>
+      <div class="preview">
+        <!-- Alerta de Câmbio Widget BEGIN -->
+        <div class="alerta-cambio-widget-container" style="max-width: 100%; margin: 0 auto;">
+          <div id="alerta-cambio-widget" style="width: 100%;"></div>
+          <div class="alerta-cambio-widget-copyright"
+            style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;">
+            <a href="https://alerta.cambiohoje.com.br" rel="noopener nofollow"
+              target="_blank" style="color: #6B7280; text-decoration: none;">
+              <span>Powered by Cambio Hoje</span>
+            </a>
+          </div>
+          <!-- Primeiro carrega o script -->
+          <script type="text/javascript" src="https://alerta.cambiohoje.com.br/widgets/ticker.js"></script>
+          <!-- Depois inicializa com as configurações -->
+          <script type="text/javascript">
+            // Inicializa imediatamente, sem esperar pelo DOMContentLoaded
+            AlertaCambioWidget.init({
+              symbols: "USD/BRL,EUR/BRL,GBP/BRL,CAD/BRL,JPY/BRL,ETH/USD,BTC/USD",
+              theme: "light",
+              bgColor: "#FFFFFF",
+              showLogos: true,
+              showVariation: true,
+              width: "100%",
+              lang: "pt-BR"
+            });
+          </script>
+        </div>
+        <!-- Alerta de Câmbio Widget END -->
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Como Incorporar o Widget</h2>
+      <p>Copie e cole o código abaixo em qualquer lugar do seu site onde você deseja que o widget apareça:</p>
+      <div class="code-block">
+&lt;!-- Alerta de Câmbio Widget BEGIN --&gt;
+&lt;div class="alerta-cambio-widget-container" style="max-width: 100%; margin: 0 auto;"&gt;
+  &lt;div id="alerta-cambio-widget" style="width: 100%;"&gt;&lt;/div&gt;
+  &lt;div class="alerta-cambio-widget-copyright"
+    style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;"&gt;
+    &lt;a href="https://alerta.cambiohoje.com.br" rel="noopener nofollow"
+      target="_blank" style="color: #6B7280; text-decoration: none;"&gt;
+      &lt;span&gt;Powered by Cambio Hoje&lt;/span&gt;
+    &lt;/a&gt;
+  &lt;/div&gt;
+  &lt;!-- Primeiro carrega o script --&gt;
+  &lt;script type="text/javascript" src="https://alerta.cambiohoje.com.br/widgets/ticker.js"&gt;&lt;/script&gt;
+  &lt;!-- Depois inicializa com as configurações --&gt;
+  &lt;script type="text/javascript"&gt;
+    // Inicializa imediatamente, sem esperar pelo DOMContentLoaded
+    AlertaCambioWidget.init({
+      symbols: "USD/BRL,EUR/BRL,GBP/BRL,CAD/BRL,JPY/BRL,ETH/USD,BTC/USD",
+      theme: "light",
+      bgColor: "#FFFFFF",
+      showLogos: true,
+      showVariation: true,
+      width: "100%",
+      lang: "pt-BR"
+    });
+  &lt;/script&gt;
+&lt;/div&gt;
+&lt;!-- Alerta de Câmbio Widget END --&gt;</div>
+    </div>
+
+    <div class="section">
+      <h2>Opções de Personalização</h2>
+      <p>Você pode personalizar o widget alterando os parâmetros na função <code>AlertaCambioWidget.init()</code>:</p>
+      <table class="options-table">
+        <tr>
+          <th>Opção</th>
+          <th>Descrição</th>
+          <th>Valores Possíveis</th>
+          <th>Padrão</th>
+        </tr>
+        <tr>
+          <td><code>symbols</code></td>
+          <td>Lista de símbolos de moedas separados por vírgula</td>
+          <td>USD/BRL, EUR/BRL, GBP/BRL, CAD/BRL, JPY/BRL, AUD/BRL, CHF/BRL, CNY/BRL, ARS/BRL, BTC/USD, ETH/USD, LTC/USD, XRP/USD, BTC/BRL, ETH/BRL</td>
+          <td>USD/BRL,EUR/BRL</td>
+        </tr>
+        <tr>
+          <td><code>theme</code></td>
+          <td>Tema do widget</td>
+          <td>light, dark</td>
+          <td>light</td>
+        </tr>
+        <tr>
+          <td><code>bgColor</code></td>
+          <td>Cor de fundo do widget</td>
+          <td>Qualquer cor hexadecimal ou 'transparent'</td>
+          <td>#FFFFFF</td>
+        </tr>
+        <tr>
+          <td><code>showLogos</code></td>
+          <td>Exibir logos das moedas</td>
+          <td>true, false</td>
+          <td>true</td>
+        </tr>
+        <tr>
+          <td><code>showVariation</code></td>
+          <td>Exibir variação percentual</td>
+          <td>true, false</td>
+          <td>true</td>
+        </tr>
+        <tr>
+          <td><code>width</code></td>
+          <td>Largura do widget</td>
+          <td>Valor em px, % ou qualquer unidade CSS válida</td>
+          <td>100%</td>
+        </tr>
+        <tr>
+          <td><code>lang</code></td>
+          <td>Idioma do widget</td>
+          <td>pt-BR, en-US</td>
+          <td>pt-BR</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Exemplos de Configuração</h2>
+      
+      <h3>Widget com Tema Escuro</h3>
+      <div class="code-block">
+AlertaCambioWidget.init({
+  symbols: "USD/BRL,EUR/BRL,GBP/BRL,CAD/BRL,JPY/BRL",
+  theme: "dark",
+  bgColor: "#333333",
+  showLogos: true,
+  showVariation: true,
+  width: "100%",
+  lang: "pt-BR"
+});</div>
+
+      <h3>Widget Apenas com Criptomoedas</h3>
+      <div class="code-block">
+AlertaCambioWidget.init({
+  symbols: "BTC/USD,ETH/USD,LTC/USD,XRP/USD,BTC/BRL,ETH/BRL",
+  theme: "light",
+  bgColor: "#FFFFFF",
+  showLogos: true,
+  showVariation: true,
+  width: "100%",
+  lang: "pt-BR"
+});</div>
+
+      <h3>Widget Minimalista (Sem Logos e Variação)</h3>
+      <div class="code-block">
+AlertaCambioWidget.init({
+  symbols: "USD/BRL,EUR/BRL",
+  theme: "light",
+  bgColor: "transparent",
+  showLogos: false,
+  showVariation: false,
+  width: "300px",
+  lang: "pt-BR"
+});</div>
+    </div>
+
+    <div class="section">
+      <h2>Suporte</h2>
+      <p>Se você tiver alguma dúvida ou precisar de ajuda com o widget, entre em contato conosco:</p>
+      <a href="mailto:suporte@cambiohoje.com.br" class="button">Contatar Suporte</a>
+    </div>
+  </div>
+</body>
+
+</html>

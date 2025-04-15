@@ -829,6 +829,16 @@ export default {
       htmlContent += '</style>';
       htmlContent += '</head><body>';
       htmlContent += '<div id="alerta-cambio-widget"></div>';
+      
+      // Adiciona um script para capturar erros
+      htmlContent += '<script>';
+      htmlContent += 'window.onerror = function(message, source, lineno, colno, error) {';
+      htmlContent += '  console.error("Erro no iframe:", message, "em", source, "linha:", lineno);';
+      htmlContent += '  document.getElementById("alerta-cambio-widget").innerHTML = "<div style=\'color:red;padding:10px;\'>Erro ao carregar widget: " + message + "</div>";';
+      htmlContent += '  return true;';
+      htmlContent += '};';
+      htmlContent += '<\/script>';
+      
       htmlContent += '<script>';
       htmlContent += 'window.alertaCambioConfig = {';
       htmlContent += 'container: "alerta-cambio-widget",';
@@ -839,10 +849,25 @@ export default {
       htmlContent += 'showVariation: ' + configWidget.value.mostrarVariacao + ',';
       htmlContent += 'lang: "' + configWidget.value.idioma + '",';
       htmlContent += 'carouselSpeed: ' + configWidget.value.velocidadeCarrossel + ',';
-      htmlContent += 'debug: false';
+      htmlContent += 'debug: true';  // Ativa o modo de depuração
       htmlContent += '};';
       htmlContent += '<\/script>';
-      htmlContent += '<script src="' + getScriptUrl() + '"><\/script>';
+      
+      // Adiciona um script para verificar se o script foi carregado
+      htmlContent += '<script>';
+      htmlContent += 'function verificarScript() {';
+      htmlContent += '  if (typeof AlertaCambioWidget === "undefined") {';
+      htmlContent += '    console.error("Erro: AlertaCambioWidget não foi carregado");';
+      htmlContent += '    document.getElementById("alerta-cambio-widget").innerHTML = "<div style=\'color:red;padding:10px;\'>Erro: O script do widget não foi carregado corretamente.<\/div>";';
+      htmlContent += '  } else {';
+      htmlContent += '    console.log("AlertaCambioWidget carregado com sucesso");';
+      htmlContent += '  }';
+      htmlContent += '}';
+      htmlContent += 'setTimeout(verificarScript, 2000);';
+      htmlContent += '<\/script>';
+      
+      const scriptUrl = getScriptUrl();
+      htmlContent += '<script src="' + scriptUrl + '" onerror="console.error(\'Erro ao carregar o script: ' + scriptUrl + '\');"><\/script>';
       htmlContent += '<\/body><\/html>';
       
       nextTick(() => {

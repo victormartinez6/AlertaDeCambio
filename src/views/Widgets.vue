@@ -293,27 +293,38 @@ export default {
         const scriptTagOpen = '<' + 'script>';
         const scriptTagClose = '</' + 'script>';
         
-        const embedCode = `<!-- Widget de Cotações - Alerta de Câmbio -->
-<div id="alerta-cambio-widget"></div>
-${scriptTagOpen}
+        const embedCode = `<!-- Alerta de Câmbio Widget BEGIN -->
+<div class="alerta-cambio-widget-container" style="max-width: 100%; margin: 0 auto;">
+  <div id="alerta-cambio-widget" style="width: 100%;"></div>
+  <div class="alerta-cambio-widget-copyright" style="font-size: 10px; text-align: right; margin-top: 4px; opacity: 0.6;">
+    <a href="https://alerta-de-cambio.vercel.app" rel="noopener nofollow" target="_blank" style="color: #6B7280; text-decoration: none;">
+      <span>Powered by Alerta de Câmbio</span>
+    </a>
+  </div>
+  ${scriptTagOpen}
   (function() {
     var script = document.createElement('script');
-    script.src = 'https://alerta-de-cambio.web.app/widgets/ticker.js';
+    script.src = 'https://alerta-de-cambio.vercel.app/widgets/ticker.js';
     script.async = true;
     script.onload = function() {
-      AlertaCambioWidget.init({
-        container: 'alerta-cambio-widget',
-        symbols: '${moedasSelecionadas}',
-        ${config.tema === 'escuro' ? "theme: 'dark'," : ""}
-        ${!config.fundoTransparente ? `bgColor: '${config.corFundo}',` : "bgColor: 'transparent',"}
-        showLogos: ${config.mostrarLogos},
-        showVariation: ${config.mostrarVariacao},
-        lang: '${config.idioma}'
-      });
+      if (window.AlertaCambioWidget) {
+        window.AlertaCambioWidget.init({
+          container: 'alerta-cambio-widget',
+          symbols: '${moedasSelecionadas}',
+          ${config.tema === 'escuro' ? "theme: 'dark'," : "theme: 'light',"}
+          ${!config.fundoTransparente ? `bgColor: '${config.corFundo}',` : "bgColor: 'transparent',"}
+          showLogos: ${config.mostrarLogos},
+          showVariation: ${config.mostrarVariacao},
+          width: '100%',
+          lang: '${config.idioma || 'pt-BR'}'
+        });
+      }
     };
     document.head.appendChild(script);
   })();
-${scriptTagClose}`;
+  ${scriptTagClose}
+</div>
+<!-- Alerta de Câmbio Widget END -->`;
         
         // Copia para a área de transferência
         navigator.clipboard.writeText(embedCode)
