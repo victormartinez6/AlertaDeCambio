@@ -19,7 +19,7 @@
             <img 
               src="@/assets/Logo_Cambio_Hoje.svg" 
               alt="Logo Câmbio Hoje" 
-              class="h-16 w-auto mx-auto mb-4"
+              class="h-12 w-auto mx-auto mb-4"
             />
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Área do Agente</h2>
             <p class="text-gray-600">Acesso restrito a colaboradores</p>
@@ -89,7 +89,7 @@
               <img 
                 src="@/assets/Logo_Cambio_Hoje.svg" 
                 alt="Logo Câmbio Hoje" 
-                class="h-8 md:h-12 w-auto"
+                class="h-7 md:h-10 w-auto"
               />
             </router-link>
           </div>
